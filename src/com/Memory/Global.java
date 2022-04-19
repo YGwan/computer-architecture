@@ -10,6 +10,4 @@ public class Global {
     public static int[] register = new int[32];
     public static int pc;
 
-    public static int[] dataMemory = new int[0x1000000];
-
 }
