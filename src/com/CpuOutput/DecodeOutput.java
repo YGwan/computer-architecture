@@ -1,5 +1,7 @@
 package com.CpuOutput;
+
 import com.Cpu.ControlSignal;
+import com.Logger;
 
 import static com.Main.mux;
 
@@ -16,8 +18,9 @@ public class DecodeOutput {
     //추가 구현 변수
     public int regDstResult; //rs, rd 선택
     public int signExt;
+    public int zeroExt;
 
-    public DecodeOutput(ControlSignal controlSignal,String opcode, int rs, int rt, int rd, int shamt, String func, int signExt) {
+    public DecodeOutput(ControlSignal controlSignal, String opcode, int rs, int rt, int rd, int shamt, String func, int signExt, int zeroExt) {
         this.controlSignal = controlSignal;
         this.opcode = opcode;
         this.rs = rs;
@@ -26,15 +29,17 @@ public class DecodeOutput {
         this.shamt = shamt;
         this.func = func;
         this.signExt = signExt;
+        this.zeroExt = zeroExt;
         set();
     }
 
     //regDst 처리 부분
     private void set() {
         regDstResult = mux(controlSignal.regDst, rd, rt);
+        regDstResult = mux(controlSignal.jal, 31, regDstResult);
     }
 
     public void printDecodeStage() {
-        System.out.printf("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d] ======> ", opcode, rs,rt);
+        Logger.println("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d]\n", opcode, rs, rt);
     }
 }

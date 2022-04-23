@@ -5,8 +5,8 @@ import com.Cpu.ControlSignal;
 import static com.Main.mux;
 
 /*
-* memory에서 연산한 값 리턴
-* */
+ * memory에서 연산한 값 리턴
+ * */
 public class MemoryOutput {
 
     ControlSignal controlSignal;

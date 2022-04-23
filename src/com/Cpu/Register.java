@@ -1,7 +1,10 @@
 package com.Cpu;
 
 import com.CpuOutput.RegisterOutput;
+import com.Logger;
 import com.Memory.Global;
+
+import static com.Main.mux;
 
 /*
  * 레지스터로 들어오는 input
@@ -11,58 +14,16 @@ public class Register {
 
     ControlSignal controlSignal;
 
+    private int writeData;
+    private int regDstResult;
+
+
     public Register(ControlSignal controlSignal) {
         this.controlSignal = controlSignal;
     }
 
-    public RegisterOutput registerCalc(String opcode, int rs, int rt, int writeRegister, String func) {
-
-        //ALUSrc 부분
-
-        //switch구문은 나중에 사라져도 된다. -> 일단 확인용
-        switch (opcode) {
-            //R타입 instruction
-            case "00": {
-                switch (func) {
-                    //move or addu
-                    case "21": {
-                        System.out.println("move 시작");
-                    }
-                    break;
-
-                    case "08": {
-                        System.out.println("jr 시작");
-                    }
-                    break;
-
-                    default: {
-                        System.out.println("0");
-                    }
-                }
-
-
-            }
-            break;
-
-            //I타입 instruction
-            //addi
-            case "09": {
-                System.out.println("addi 시작");
-            }
-            break;
-
-            //sw
-            case "2b": {
-                System.out.println("sw 시작");
-            }
-            break;
-
-            case "23": {
-                System.out.println("lw 시작");
-            }
-            break;
-            //J타입 instruction
-        }
+    public RegisterOutput registerCalc(int rs, int rt, int writeRegister) {
+        this.regDstResult = writeRegister;
 
         return new RegisterOutput(
                 controlSignal,
@@ -71,9 +32,23 @@ public class Register {
         );
     }
 
-    public void registerWrite(int regDstResult, int memToRegResult) {
+    public void registerWrite(int memToRegResult) {
+        this.writeData = mux(controlSignal.jal, Global.pc + 2, memToRegResult);
         if (controlSignal.regWrite) {
-            Global.register[regDstResult] = memToRegResult;
+            Global.register[regDstResult] = writeData;
+        }
+    }
+
+    public void printExecutionWriteBack() {
+        if (controlSignal.regWrite) {
+            if (controlSignal.jal) {
+                Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData * 4);
+            } else {
+                Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData);
+            }
+            Global.register[regDstResult] = writeData;
+        } else {
+            Logger.println("WB Stage -> ");
         }
     }
 

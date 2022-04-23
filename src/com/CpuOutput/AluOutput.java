@@ -1,8 +1,10 @@
 package com.CpuOutput;
 
+import com.Logger;
+
 /*
-*ALU에서 연산한 값 리턴
-* */
+ *ALU에서 연산한 값 리턴
+ * */
 public class AluOutput {
 
     public int aluCalcResult;
@@ -11,8 +13,8 @@ public class AluOutput {
         this.aluCalcResult = aluResult;
     }
 
-    public void executionOutputPrint() {
-        System.out.printf("EX Stage -> result : %d\n", aluCalcResult);
+    public void printExecutionOutput() {
+        Logger.println("EX Stage -> result : %d\n", aluCalcResult);
     }
 
 }

@@ -24,6 +24,7 @@ public class Decode {
         int shamt = readTobinaryString(binaryInstruction.substring(21, 26));
         String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
         int signExt = setSignExtImm(binaryInstruction);
+        int zeroExt = setZeroExt(binaryInstruction);
 
         //controlSignal 초기화 작업
         this.controlSignal.initailcontrolSignal();
@@ -38,13 +39,14 @@ public class Decode {
                 rd,
                 shamt,
                 func,
-                signExt
+                signExt,
+                zeroExt
         );
     }
 
     //signExt 만들기
+    //SignExtImm = { 16{immediate[15]}, immediate
     public int setSignExtImm(String binaryInstruction) {
-        //SignExtImm = { 16{immediate[15]}, immediate}
         char firstImmeBit = binaryInstruction.charAt(16);
         StringBuilder signExtImmBinaryString = new StringBuilder();
 
@@ -63,9 +65,18 @@ public class Decode {
         }
     }
 
+    //zeroExt 만들기
+    //ZeroExtImm = { 16{1b’0}, immediate }
+    public int setZeroExt(String binaryInstruction) {
+        StringBuilder zeroExtImmBinaryString = new StringBuilder();
+        zeroExtImmBinaryString.append("0000000000000000");
+        zeroExtImmBinaryString.append(binaryInstruction.substring(16, 32));
+        return readTobinaryString(zeroExtImmBinaryString.toString());
+    }
+
     // 연산에 필요한 함수 구현 (parsing 함수 부분)
     //2진수를 16진수로 변환
-    public static String binTohex(String instruction) {
+    private static String binTohex(String instruction) {
         int dec = Integer.parseInt(instruction, 2);
         return Integer.toString(dec, 16);
     }
@@ -75,13 +86,13 @@ public class Decode {
         return Integer.parseInt(instruction, 2);
     }
 
-    //음수 2진수를 10진수로 변환 -> 보수작업 추가
-    public int readToNegativebinaryString(String instruction) {
+    //음수 2진수를 10진수로 변환 -> 보수 작업 추가
+    private int readToNegativebinaryString(String instruction) {
         return Integer.parseUnsignedInt(instruction, 2);
     }
 
     //opcode 변환
-    public String checkOpcodeOrFunc(String partOfinstruction) {
+    private String checkOpcodeOrFunc(String partOfinstruction) {
         String opcode1 = binTohex(partOfinstruction.substring(0, 2));
         String opcode2 = binTohex(partOfinstruction.substring(2, 6));
         return opcode1 + opcode2;

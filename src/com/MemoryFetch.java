@@ -75,6 +75,8 @@ public class MemoryFetch {
         return binaryInstructions.get(pc);
     }
 
-    public String printHexInst(int pc) { return hexInstructions.get(pc);}
+    public String printHexInst(int pc) {
+        return hexInstructions.get(pc);
+    }
 }
 

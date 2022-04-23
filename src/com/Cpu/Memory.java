@@ -1,14 +1,17 @@
 package com.Cpu;
 
 import com.CpuOutput.MemoryOutput;
+import com.Logger;
 
 public class Memory {
 
-    private int memesize = 0x1000000;
+    private final int memesize = 0x1000000;
     public int[] dataMemory = new int[memesize];
 
     ControlSignal controlSignal;
-    int address;
+
+    private int address;
+    private int writedata;
 
     public Memory(ControlSignal controlSignal) {
         this.controlSignal = controlSignal;
@@ -17,8 +20,8 @@ public class Memory {
     //MemtoReg = true
     public MemoryOutput read(int address) {
         if (controlSignal.memRead) {
-            System.out.printf("MA Stage -> M[%d] Load\n", address/4);
-            return new MemoryOutput(controlSignal, dataMemory[address / 4]);
+            this.address = address;
+            return new MemoryOutput(controlSignal, dataMemory[address]);
         }
         return new MemoryOutput(controlSignal, 0);
     }
@@ -26,13 +29,20 @@ public class Memory {
     //MemtoWrite
     public void write(int address, int writedata) {
         this.address = address;
+        this.writedata = writedata;
         if (controlSignal.memWrite) {
-            System.out.printf("MA Stage -> M[%d] = %d\n", address/4, writedata);
-            dataMemory[address / 4] = writedata;
+            dataMemory[address] = writedata;
         }
     }
 
-    public void printDataMemory() {
-        System.out.println(dataMemory[address/4]);
+    public void printExecutionMemoryAccess() {
+        String index = Integer.toHexString(address);
+        if (controlSignal.memRead) {
+            Logger.println("MA Stage -> M[0x%s] = %d\n", index, dataMemory[address]);
+        } else if (controlSignal.memWrite) {
+            Logger.println("MA Stage -> M[0x%s] = %d\n", index, writedata);
+        } else {
+            Logger.println("MA Stage -> ");
+        }
     }
 }

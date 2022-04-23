@@ -13,11 +13,13 @@ public class Main extends Global {
 
     public static void main(String[] args) throws IOException {
 
+        Logger.LOGGING_SIGNAL = false;
+
         initializedRegister();
 
-        String path = "source/simple.bin";
+        String path = "source/input4.bin";
 
-        System.out.println("----------Cycle Start----------\n");
+        Logger.println("\n----------Cycle Start----------\n");
 
         //Fetch 선언 및 Instruction Fetch
         MemoryFetch memoryFetch = new MemoryFetch(path);
@@ -28,49 +30,64 @@ public class Main extends Global {
         ControlSignal controlSignal = new ControlSignal(); //Decode 함수에서 초기화 작업 진행
         Decode decode = new Decode(controlSignal);
         Register register = new Register(controlSignal);
+        PC pcUpdate = new PC(controlSignal);
         ALU alu = new ALU(controlSignal);
         Memory memory = new Memory(controlSignal);
 
+        int cycleCount = 1;
 
-        while (pc < memoryFetch.size()) { //나중에 -1 조건으로 고치기
+        while (pc != -1) {
 
+            //total cycle 수 측정
+            Logger.println("Cycle Count : %d\n", cycleCount++);
             // instruction fetch
             String inst = memoryFetch.fetch(pc);
+            String pcHex = Integer.toHexString(pc * 4);
+            Logger.println("IF Stage -> pc : 0x%s, instruction : 0x%s", pcHex, memoryFetch.printHexInst(pc));
 
-            System.out.println("IF Stage -> " + memoryFetch.printHexInst(pc));
-
-            //pc update
-            pc++;
 
             // instruction decode
             DecodeOutput decodeOutput = decode.decodeInstruction(inst);
             decodeOutput.printDecodeStage();
-            RegisterOutput registerOutput = register.registerCalc(decodeOutput.opcode, decodeOutput.rs,
-                    decodeOutput.rt, decodeOutput.regDstResult, decodeOutput.func);
+
+            RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
+                    decodeOutput.rt, decodeOutput.regDstResult);
+
+
             //ALUSrc를 위해 signExt 보내기
             registerOutput.acceptSignExt(decodeOutput.signExt);
-            registerOutput.executionInputPrint();
+            registerOutput.acceptZeroExt(decodeOutput.zeroExt);
+            registerOutput.printExecutionInput();
 
             //Execution
             AluOutput aluOutput = alu.process(registerOutput.firstRegisterOutput, registerOutput.aluSrcResult);
-            aluOutput.executionOutputPrint();
+
+            aluOutput.printExecutionOutput();
 
             //Memory Access
             MemoryOutput memoryOutput = memory.read(aluOutput.aluCalcResult);
             memory.write(aluOutput.aluCalcResult, registerOutput.secondRegisterOutput);
-           //MemtoReg를 위한 값 보내기
+
+            //MemtoReg를 위한 값 보내기
             memoryOutput.acceptAluResult(aluOutput.aluCalcResult);
+            memory.printExecutionMemoryAccess();
+
             //writeBack
-            register.registerWrite(decodeOutput.regDstResult,memoryOutput.memToRegResult);
+            register.registerWrite(memoryOutput.memToRegResult);
+            register.printExecutionWriteBack();
 
-            System.out.println();
+            //pc Update
+            pcUpdate.setInstruction(inst);
+            pcUpdate.pcUpdate(registerOutput.firstRegisterOutput, aluOutput.aluCalcResult);
+            Logger.println("");
 
+//         :
         }
 
     }
 
     public static int mux(boolean signal, int trueVal, int falseVal) {
-        if(signal) {
+        if (signal) {
             return trueVal;
         }
         return falseVal;
@@ -81,5 +98,4 @@ public class Main extends Global {
         register[29] = 0x1000000;
         register[31] = 0xFFFFFFFF;
     }
-
 }
