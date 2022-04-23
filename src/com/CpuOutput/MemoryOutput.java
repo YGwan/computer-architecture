@@ -1,4 +1,6 @@
-package com.Cpu;
+package com.CpuOutput;
+
+import com.Cpu.ControlSignal;
 
 import static com.Main.mux;
 

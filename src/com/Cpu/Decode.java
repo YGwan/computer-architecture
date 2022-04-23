@@ -1,6 +1,6 @@
 package com.Cpu;
 
-import static com.Main.mux;
+import com.CpuOutput.DecodeOutput;
 
 /*
  * 명령어 처리 - 구간 별로 나누기

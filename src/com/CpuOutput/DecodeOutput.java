@@ -1,4 +1,6 @@
-package com.Cpu;
+package com.CpuOutput;
+import com.Cpu.ControlSignal;
+
 import static com.Main.mux;
 
 
@@ -32,4 +34,7 @@ public class DecodeOutput {
         regDstResult = mux(controlSignal.regDst, rd, rt);
     }
 
+    public void printDecodeStage() {
+        System.out.printf("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d] ======> ", opcode, rs,rt);
+    }
 }

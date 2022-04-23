@@ -1,6 +1,10 @@
 package com;
 
 import com.Cpu.*;
+import com.CpuOutput.AluOutput;
+import com.CpuOutput.DecodeOutput;
+import com.CpuOutput.MemoryOutput;
+import com.CpuOutput.RegisterOutput;
 import com.Memory.Global;
 
 import java.io.IOException;
@@ -12,6 +16,8 @@ public class Main extends Global {
         initializedRegister();
 
         String path = "source/simple.bin";
+
+        System.out.println("----------Cycle Start----------\n");
 
         //Fetch 선언 및 Instruction Fetch
         MemoryFetch memoryFetch = new MemoryFetch(path);
@@ -25,23 +31,29 @@ public class Main extends Global {
         ALU alu = new ALU(controlSignal);
         Memory memory = new Memory(controlSignal);
 
+
         while (pc < memoryFetch.size()) { //나중에 -1 조건으로 고치기
 
             // instruction fetch
             String inst = memoryFetch.fetch(pc);
+
+            System.out.println("IF Stage -> " + memoryFetch.printHexInst(pc));
 
             //pc update
             pc++;
 
             // instruction decode
             DecodeOutput decodeOutput = decode.decodeInstruction(inst);
+            decodeOutput.printDecodeStage();
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.opcode, decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.regDstResult, decodeOutput.func);
             //ALUSrc를 위해 signExt 보내기
             registerOutput.acceptSignExt(decodeOutput.signExt);
+            registerOutput.executionInputPrint();
 
             //Execution
             AluOutput aluOutput = alu.process(registerOutput.firstRegisterOutput, registerOutput.aluSrcResult);
+            aluOutput.executionOutputPrint();
 
             //Memory Access
             MemoryOutput memoryOutput = memory.read(aluOutput.aluCalcResult);
@@ -50,8 +62,10 @@ public class Main extends Global {
             memoryOutput.acceptAluResult(aluOutput.aluCalcResult);
             //writeBack
             register.registerWrite(decodeOutput.regDstResult,memoryOutput.memToRegResult);
-        }
 
+            System.out.println();
+
+        }
 
     }
 
@@ -67,4 +81,5 @@ public class Main extends Global {
         register[29] = 0x1000000;
         register[31] = 0xFFFFFFFF;
     }
+
 }

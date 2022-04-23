@@ -1,6 +1,8 @@
 package com.Cpu;
 
 
+import com.CpuOutput.AluOutput;
+
 public class ALU {
 
     ControlSignal controlSignal;

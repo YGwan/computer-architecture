@@ -1,5 +1,6 @@
 package com.Cpu;
 
+import com.CpuOutput.RegisterOutput;
 import com.Memory.Global;
 
 /*

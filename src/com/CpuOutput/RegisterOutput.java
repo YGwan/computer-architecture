@@ -1,5 +1,6 @@
-package com.Cpu;
+package com.CpuOutput;
 
+import com.Cpu.ControlSignal;
 import com.Memory.Global;
 
 import javax.xml.bind.annotation.XmlElementDecl;
@@ -33,5 +34,9 @@ public class RegisterOutput {
     //ALUSrc 처리 부분
     private void set() {
         aluSrcResult = mux(controlSignal.aluSrc, signExt, secondRegisterOutput);
+    }
+
+    public void executionInputPrint() {
+        System.out.printf("EX Input -> ALU Input1 : %d, ALU Input2 : %d\n", firstRegisterOutput, aluSrcResult);
     }
 }
