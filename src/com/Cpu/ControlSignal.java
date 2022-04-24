@@ -17,6 +17,8 @@ public class ControlSignal {
     public boolean jr;
     public boolean jal;
     public boolean ori;
+    public boolean lui;
+    public boolean sll;
     public int aluControl;
 
     public void initailcontrolSignal() {
@@ -31,6 +33,8 @@ public class ControlSignal {
         jr = false;
         jal = false;
         ori = false;
+        lui = false;
+        sll = false;
         aluControl = 0;
     }
 
@@ -73,6 +77,14 @@ public class ControlSignal {
                         regWrite = true;
                     }
                     break;
+
+                    case "00" : {
+                        Logger.println("(SLL)");
+                        aluControl = 6;
+                        sll = true;
+                        regDst = true;
+                        regWrite = true;
+                    } break;
 
                     default: {
                         Logger.println();
@@ -133,6 +145,13 @@ public class ControlSignal {
                 Logger.println("(ORI)");
                 ori = true;
                 aluControl = 5;
+                regWrite = true;
+            }
+            break;
+
+            case "0f" : {
+                Logger.println("(LUI)");
+                lui = true;
                 regWrite = true;
             }
             break;

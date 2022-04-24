@@ -14,6 +14,7 @@ public class Main extends Global {
     public static void main(String[] args) throws IOException {
 
         Logger.LOGGING_SIGNAL = false;
+        Logger.LOGGING_COUNTER_SIGNAL = true;
 
         initializedRegister();
 
@@ -38,12 +39,29 @@ public class Main extends Global {
 
         while (pc != -1) {
 
+//            try {
+//                Thread.sleep(30);
+//            } catch ( Exception e) {
+//
+//            }
+
+            if(cycleCount > 26000) {
+                Logger.LOGGING_SIGNAL = false;
+            }
+
+            if(cycleCount > 25000 && cycleCount < 26000) {
+                Logger.LOGGING_SIGNAL = true;
+            }
+
             //total cycle 수 측정
-            Logger.println("Cycle Count : %d\n", cycleCount++);
+            if(cycleCount % 1000000 == 0) {
+                Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
+            }
             // instruction fetch
             String inst = memoryFetch.fetch(pc);
             String pcHex = Integer.toHexString(pc * 4);
-            Logger.println("IF Stage -> pc : 0x%s, instruction : 0x%s", pcHex, memoryFetch.printHexInst(pc));
+            Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount++, pcHex, memoryFetch.printHexInst(pc));
+
 
 
             // instruction decode
@@ -54,14 +72,15 @@ public class Main extends Global {
                     decodeOutput.rt, decodeOutput.regDstResult);
 
 
-            //ALUSrc를 위해 signExt 보내기
+            //ALUSrc를 위해 signExt ,zeroExt, shamt보내기
             registerOutput.acceptSignExt(decodeOutput.signExt);
             registerOutput.acceptZeroExt(decodeOutput.zeroExt);
+            registerOutput.acceptShamt(decodeOutput.shamt);
             registerOutput.printExecutionInput();
 
             //Execution
-            AluOutput aluOutput = alu.process(registerOutput.firstRegisterOutput, registerOutput.aluSrcResult);
-
+            AluOutput aluOutput = alu.process(registerOutput.firstValue, registerOutput.aluSrcResult);
+            aluOutput.acceptLoadUpperImm(decodeOutput.loadUpperImm);
             aluOutput.printExecutionOutput();
 
             //Memory Access
@@ -80,9 +99,9 @@ public class Main extends Global {
             pcUpdate.setInstruction(inst);
             pcUpdate.pcUpdate(registerOutput.firstRegisterOutput, aluOutput.aluCalcResult);
             Logger.println("");
-
-//         :
         }
+        System.out.println("###################");
+        System.out.println(Global.register[2]);
 
     }
 

@@ -16,7 +16,9 @@ public class RegisterOutput {
     public int secondRegisterOutput;
     private int signExt;
     private int zeroExt;
+    private int shamt;
 
+    public int firstValue;
     public int aluSrcResult;
 
     public RegisterOutput(ControlSignal controlSignal, int firstRegisterOutput, int secondRegisterOutput) {
@@ -31,14 +33,21 @@ public class RegisterOutput {
 
     public void acceptZeroExt(int zeroExt) {
         this.zeroExt = zeroExt;
+    }
+
+    //shamt 처리 부분
+    public void acceptShamt(int shamt) {
+        Logger.println("shamt" + shamt);
+        this.shamt = shamt;
         set();
     }
 
 
-    //ALUSrc 처리 부분
+    //ALUSrc, sll 처리 부분
     private void set() {
         aluSrcResult = mux(controlSignal.aluSrc, signExt, secondRegisterOutput);
         aluSrcResult = mux(controlSignal.ori, zeroExt, aluSrcResult);
+        firstValue = mux(controlSignal.sll, shamt, firstRegisterOutput);
     }
 
     public void printExecutionInput() {

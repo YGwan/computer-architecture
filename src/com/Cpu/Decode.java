@@ -25,6 +25,7 @@ public class Decode {
         String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
         int signExt = setSignExtImm(binaryInstruction);
         int zeroExt = setZeroExt(binaryInstruction);
+        int loadUpperImm = setLoadUpperImm(binaryInstruction);
 
         //controlSignal 초기화 작업
         this.controlSignal.initailcontrolSignal();
@@ -40,7 +41,8 @@ public class Decode {
                 shamt,
                 func,
                 signExt,
-                zeroExt
+                zeroExt,
+                loadUpperImm
         );
     }
 
@@ -72,6 +74,22 @@ public class Decode {
         zeroExtImmBinaryString.append("0000000000000000");
         zeroExtImmBinaryString.append(binaryInstruction.substring(16, 32));
         return readTobinaryString(zeroExtImmBinaryString.toString());
+    }
+
+    //Load Upper Imm 만들기
+    //{imm, 16’b0}
+    public int setLoadUpperImm(String binaryInstruction) {
+        StringBuilder loadUpperImmBinaryString = new StringBuilder();
+        loadUpperImmBinaryString.append(binaryInstruction.substring(16, 32));
+        loadUpperImmBinaryString.append("0000000000000000");
+
+        char firstImmeBit = binaryInstruction.charAt(16);
+        // 보수 처리 할지 말지 구현
+        if (firstImmeBit == '1') {
+            return readToNegativebinaryString(loadUpperImmBinaryString.toString());
+        } else {
+            return readTobinaryString(loadUpperImmBinaryString.toString());
+        }
     }
 
     // 연산에 필요한 함수 구현 (parsing 함수 부분)

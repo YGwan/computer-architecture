@@ -2,6 +2,7 @@ package com.Cpu;
 
 
 import com.CpuOutput.AluOutput;
+import com.Logger;
 
 public class ALU {
 
@@ -20,40 +21,48 @@ public class ALU {
         //기본 연산 - (+)
         if (controlSignal.aluControl == 0) {
             aluResult = firstRegisterResult + aluSrcResult;
-            return new AluOutput(aluResult);
+            return new AluOutput(controlSignal, aluResult);
         }
 
         //비교 연산 - slti
         else if (controlSignal.aluControl == 1) {
             if (firstRegisterResult < aluSrcResult) {
-                return new AluOutput(1);
-            } else return new AluOutput(0);
+                return new AluOutput(controlSignal,1);
+            } else return new AluOutput(controlSignal,0);
         }
         //비교 연산 - bne
         else if (controlSignal.aluControl == 2) {
             if (firstRegisterResult != aluSrcResult) {
-                return new AluOutput(1);
-            } else return new AluOutput(0);
+                return new AluOutput(controlSignal,1);
+            } else return new AluOutput(controlSignal,0);
         }
         //비교 연산 - beq
         else if (controlSignal.aluControl == 3) {
             if (firstRegisterResult == aluSrcResult) {
-                return new AluOutput(1);
-            } else return new AluOutput(0);
+                return new AluOutput(controlSignal,1);
+            } else return new AluOutput(controlSignal,0);
         }
 
         //사칙 연산 - subu(-)
         else if (controlSignal.aluControl == 4) {
             aluResult = firstRegisterResult - aluSrcResult;
-            return new AluOutput(aluResult);
+            return new AluOutput(controlSignal,aluResult);
         }
 
         //논리 연산 - ori
         else if (controlSignal.aluControl == 5) {
             aluResult = firstRegisterResult | aluSrcResult;
-            return new AluOutput(aluResult);
+            return new AluOutput(controlSignal,aluResult);
         }
-        return new AluOutput(0);
+
+        //shift연산 - sll
+        else if(controlSignal.aluControl == 6) {
+            Logger.println("!!!!!" + firstRegisterResult);
+            aluResult = aluSrcResult << firstRegisterResult;
+            return new AluOutput(controlSignal,aluResult);
+        }
+
+        return new AluOutput(controlSignal,0);
     }
 
 

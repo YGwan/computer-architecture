@@ -19,8 +19,11 @@ public class DecodeOutput {
     public int regDstResult; //rs, rd 선택
     public int signExt;
     public int zeroExt;
+    public int loadUpperImm;
 
-    public DecodeOutput(ControlSignal controlSignal, String opcode, int rs, int rt, int rd, int shamt, String func, int signExt, int zeroExt) {
+    public DecodeOutput(ControlSignal controlSignal, String opcode, int rs, int rt, int rd,
+                        int shamt, String func, int signExt, int zeroExt, int loadUpperImm) {
+
         this.controlSignal = controlSignal;
         this.opcode = opcode;
         this.rs = rs;
@@ -30,6 +33,7 @@ public class DecodeOutput {
         this.func = func;
         this.signExt = signExt;
         this.zeroExt = zeroExt;
+        this.loadUpperImm = loadUpperImm;
         set();
     }
 
