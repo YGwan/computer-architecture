@@ -37,7 +37,6 @@ public class RegisterOutput {
 
     //shamt 처리 부분
     public void acceptShamt(int shamt) {
-        Logger.println("shamt" + shamt);
         this.shamt = shamt;
         set();
     }

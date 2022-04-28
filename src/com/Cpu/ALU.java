@@ -57,7 +57,6 @@ public class ALU {
 
         //shift연산 - sll
         else if(controlSignal.aluControl == 6) {
-            Logger.println("!!!!!" + firstRegisterResult);
             aluResult = aluSrcResult << firstRegisterResult;
             return new AluOutput(controlSignal,aluResult);
         }

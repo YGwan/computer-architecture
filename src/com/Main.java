@@ -13,7 +13,7 @@ public class Main extends Global {
 
     public static void main(String[] args) throws IOException {
 
-        Logger.LOGGING_SIGNAL = false;
+        Logger.LOGGING_SIGNAL = true;
         Logger.LOGGING_COUNTER_SIGNAL = true;
 
         initializedRegister();
@@ -38,21 +38,6 @@ public class Main extends Global {
         int cycleCount = 1;
 
         while (pc != -1) {
-
-//            try {
-//                Thread.sleep(30);
-//            } catch ( Exception e) {
-//
-//            }
-
-            if(cycleCount > 26000) {
-                Logger.LOGGING_SIGNAL = false;
-            }
-
-            if(cycleCount > 25000 && cycleCount < 26000) {
-                Logger.LOGGING_SIGNAL = true;
-            }
-
             //total cycle 수 측정
             if(cycleCount % 1000000 == 0) {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
@@ -60,17 +45,13 @@ public class Main extends Global {
             // instruction fetch
             String inst = memoryFetch.fetch(pc);
             String pcHex = Integer.toHexString(pc * 4);
-            Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount++, pcHex, memoryFetch.printHexInst(pc));
-
-
+            Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s", cycleCount++, pcHex, memoryFetch.printHexInst(pc));
 
             // instruction decode
             DecodeOutput decodeOutput = decode.decodeInstruction(inst);
             decodeOutput.printDecodeStage();
-
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.regDstResult);
-
 
             //ALUSrc를 위해 signExt ,zeroExt, shamt보내기
             registerOutput.acceptSignExt(decodeOutput.signExt);
@@ -98,14 +79,12 @@ public class Main extends Global {
             //pc Update
             pcUpdate.setInstruction(inst);
             pcUpdate.pcUpdate(registerOutput.firstRegisterOutput, aluOutput.aluCalcResult);
-            Logger.println("");
+            Logger.println();
         }
-        System.out.println("###################");
-        System.out.println(Global.register[2]);
+        System.out.printf("\nresult value R[2] : %d\n",Global.register[2]);
+     }
 
-    }
-
-    public static int mux(boolean signal, int trueVal, int falseVal) {
+    public static  int mux(boolean signal, int trueVal, int falseVal) {
         if (signal) {
             return trueVal;
         }

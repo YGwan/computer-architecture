@@ -17,7 +17,7 @@ public class Memory {
         this.controlSignal = controlSignal;
     }
 
-    //MemtoReg = true
+    //MemRead
     public MemoryOutput read(int address) {
         if (controlSignal.memRead) {
             this.address = address;
@@ -26,7 +26,7 @@ public class Memory {
         return new MemoryOutput(controlSignal, 0);
     }
 
-    //MemtoWrite
+    //MemWrite
     public void write(int address, int writedata) {
         this.address = address;
         this.writedata = writedata;

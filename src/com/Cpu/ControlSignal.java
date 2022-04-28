@@ -38,38 +38,30 @@ public class ControlSignal {
         aluControl = 0;
     }
 
-
     public void setControlSignal(String opcode, String func) {
 
         switch (opcode) {
             //R타입 instruction
             case "00": {
                 switch (func) {
-
                     case "21": {
                         Logger.println("(ADDU)");
                         regDst = true;
                         regWrite = true;
-
                     }
                     break;
-
                     case "08": {
                         Logger.println("(jr)");
                         jr = true;
-
                     }
                     break;
-
                     case "2a": {
                         Logger.println("(SLT)");
                         aluControl = 1;
                         regDst = true;
                         regWrite = true;
-
                     }
                     break;
-
                     case "23": {
                         Logger.println("(SUBU)");
                         aluControl = 4;
@@ -77,23 +69,21 @@ public class ControlSignal {
                         regWrite = true;
                     }
                     break;
-
-                    case "00" : {
+                    case "00": {
                         Logger.println("(SLL)");
                         aluControl = 6;
                         sll = true;
                         regDst = true;
                         regWrite = true;
-                    } break;
-
+                    }
+                    break;
                     default: {
                         Logger.println();
-                        throw new IllegalArgumentException("없는 opcode입니다. : "+ opcode);
+                        throw new IllegalArgumentException("없는 opcode입니다. : " + opcode);
                     }
                 }
             }
             break;
-
             //I타입 instruction
             case "09": {
                 Logger.println("(ADDI)");
@@ -101,7 +91,6 @@ public class ControlSignal {
                 regWrite = true;
             }
             break;
-
             case "2b": {
                 Logger.println("(SW)");
                 aluSrc = true;
@@ -109,7 +98,6 @@ public class ControlSignal {
                 memWrite = true;
             }
             break;
-
             case "0a": {
                 Logger.println("(SLTI)");
                 aluControl = 1;
@@ -117,21 +105,18 @@ public class ControlSignal {
                 regWrite = true;
             }
             break;
-
             case "04": {
                 Logger.println("(BEQ)");
                 aluControl = 3;
                 branch = true;
             }
             break;
-
             case "05": {
                 Logger.println("(BNE)");
                 aluControl = 2;
                 branch = true;
             }
             break;
-
             case "23": {
                 Logger.println("(LW)");
                 aluSrc = true;
@@ -140,7 +125,6 @@ public class ControlSignal {
                 regWrite = true;
             }
             break;
-
             case "0d": {
                 Logger.println("(ORI)");
                 ori = true;
@@ -148,32 +132,27 @@ public class ControlSignal {
                 regWrite = true;
             }
             break;
-
-            case "0f" : {
+            case "0f": {
                 Logger.println("(LUI)");
                 lui = true;
                 regWrite = true;
             }
             break;
-
             //J타입 instruction
-
             case "02": {
                 Logger.println("(JUMP)");
                 jump = true;
                 regWrite = true;
             }
             break;
-
             case "03": {
                 Logger.println("(JAL)");
                 jal = true;
                 regWrite = true;
             }
             break;
-
             default:
-                throw new IllegalArgumentException("없는 opcode입니다. : "+ opcode);
+                throw new IllegalArgumentException("없는 opcode입니다. : " + opcode);
         }
     }
 }

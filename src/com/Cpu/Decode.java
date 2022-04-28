@@ -31,7 +31,6 @@ public class Decode {
         this.controlSignal.initailcontrolSignal();
         this.controlSignal.setControlSignal(opcode, func);
 
-
         return new DecodeOutput(
                 controlSignal,
                 opcode,
@@ -45,7 +44,6 @@ public class Decode {
                 loadUpperImm
         );
     }
-
     //signExt 만들기
     //SignExtImm = { 16{immediate[15]}, immediate
     public int setSignExtImm(String binaryInstruction) {

@@ -48,7 +48,8 @@ public class MemoryFetch {
                 char singleDigit = instruction.charAt(bitIndex);
                 String str = String.valueOf(singleDigit);
                 int hexNumber = Integer.parseInt(str, 16);
-                binaryInstruction.append(String.format("%4s", Integer.toBinaryString(hexNumber)).replace(" ", "0"));
+                binaryInstruction.append(String.format("%4s", Integer.toBinaryString(hexNumber)).
+                        replace(" ","0"));
             }
             binaryInstructions.add(binaryInstruction.toString());
         }
