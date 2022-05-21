@@ -45,32 +45,27 @@ public class ControlSignal {
             case "00": {
                 switch (func) {
                     case "21": {
-                        Logger.println("(ADDU)");
                         regDst = true;
                         regWrite = true;
                     }
                     break;
                     case "08": {
-                        Logger.println("(jr)");
                         jr = true;
                     }
                     break;
                     case "2a": {
-                        Logger.println("(SLT)");
                         aluControl = 1;
                         regDst = true;
                         regWrite = true;
                     }
                     break;
                     case "23": {
-                        Logger.println("(SUBU)");
                         aluControl = 4;
                         regDst = true;
                         regWrite = true;
                     }
                     break;
                     case "00": {
-                        Logger.println("(SLL)");
                         aluControl = 6;
                         sll = true;
                         regDst = true;
@@ -86,39 +81,33 @@ public class ControlSignal {
             break;
             //I타입 instruction
             case "09": {
-                Logger.println("(ADDI)");
                 aluSrc = true;
                 regWrite = true;
             }
             break;
             case "2b": {
-                Logger.println("(SW)");
                 aluSrc = true;
                 memToReg = true;
                 memWrite = true;
             }
             break;
             case "0a": {
-                Logger.println("(SLTI)");
                 aluControl = 1;
                 aluSrc = true;
                 regWrite = true;
             }
             break;
             case "04": {
-                Logger.println("(BEQ)");
                 aluControl = 3;
                 branch = true;
             }
             break;
             case "05": {
-                Logger.println("(BNE)");
                 aluControl = 2;
                 branch = true;
             }
             break;
             case "23": {
-                Logger.println("(LW)");
                 aluSrc = true;
                 memRead = true;
                 memToReg = true;
@@ -126,27 +115,23 @@ public class ControlSignal {
             }
             break;
             case "0d": {
-                Logger.println("(ORI)");
                 ori = true;
                 aluControl = 5;
                 regWrite = true;
             }
             break;
             case "0f": {
-                Logger.println("(LUI)");
                 lui = true;
                 regWrite = true;
             }
             break;
             //J타입 instruction
             case "02": {
-                Logger.println("(JUMP)");
                 jump = true;
                 regWrite = true;
             }
             break;
             case "03": {
-                Logger.println("(JAL)");
                 jal = true;
                 regWrite = true;
             }

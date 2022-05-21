@@ -1,6 +1,7 @@
 package com.Cpu;
 
 import com.CpuOutput.DecodeOutput;
+import com.Memory.Global;
 
 /*
  * 명령어 처리 - 구간 별로 나누기
@@ -16,32 +17,46 @@ public class Decode {
 
     public DecodeOutput decodeInstruction(String binaryInstruction) {
 
-        //변수 할당 부분
-        String opcode = checkOpcodeOrFunc(binaryInstruction.substring(0, 6));
-        int rs = readTobinaryString(binaryInstruction.substring(6, 11));
-        int rt = readTobinaryString(binaryInstruction.substring(11, 16));
-        int rd = readTobinaryString(binaryInstruction.substring(16, 21));
-        int shamt = readTobinaryString(binaryInstruction.substring(21, 26));
-        String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
-        int signExt = setSignExtImm(binaryInstruction);
-        int zeroExt = setZeroExt(binaryInstruction);
-        int loadUpperImm = setLoadUpperImm(binaryInstruction);
+        if (Global.IF_IDValid) {
+            //변수 할당 부분
+            String opcode = checkOpcodeOrFunc(binaryInstruction.substring(0, 6));
+            int rs = readTobinaryString(binaryInstruction.substring(6, 11));
+            int rt = readTobinaryString(binaryInstruction.substring(11, 16));
+            int rd = readTobinaryString(binaryInstruction.substring(16, 21));
+            int shamt = readTobinaryString(binaryInstruction.substring(21, 26));
+            String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
+            int signExt = setSignExtImm(binaryInstruction);
+            int zeroExt = setZeroExt(binaryInstruction);
+            int loadUpperImm = setLoadUpperImm(binaryInstruction);
 
-        //controlSignal 초기화 작업
-        this.controlSignal.initailcontrolSignal();
-        this.controlSignal.setControlSignal(opcode, func);
+            //controlSignal 초기화 작업
+            this.controlSignal.initailcontrolSignal();
+            this.controlSignal.setControlSignal(opcode, func);
 
-        return new DecodeOutput(
+            return new DecodeOutput(
+                    controlSignal,
+                    opcode,
+                    rs,
+                    rt,
+                    rd,
+                    shamt,
+                    func,
+                    signExt,
+                    zeroExt,
+                    loadUpperImm
+            );
+        } else return new DecodeOutput(
                 controlSignal,
-                opcode,
-                rs,
-                rt,
-                rd,
-                shamt,
-                func,
-                signExt,
-                zeroExt,
-                loadUpperImm
+                null,
+                0,
+                0,
+                0,
+                0,
+                null,
+                0,
+                0,
+                0
+
         );
     }
     //signExt 만들기

@@ -1,2 +1,4 @@
-package com.Latch;public class EXE_MEM {
+package com.Latch;
+
+public class EXE_MEM {
 }

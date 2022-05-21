@@ -5,6 +5,8 @@ import com.CpuOutput.AluOutput;
 import com.CpuOutput.DecodeOutput;
 import com.CpuOutput.MemoryOutput;
 import com.CpuOutput.RegisterOutput;
+import com.Latch.ID_EXE;
+import com.Latch.IF_ID;
 import com.Memory.Global;
 
 import java.io.IOException;
@@ -18,9 +20,9 @@ public class Main extends Global {
 
         initializedRegister();
 
-        String path = "source/input4.bin";
+        String path = "source/simple.bin";
 
-        Logger.println("\n----------Cycle Start----------\n");
+        Logger.println("\n----------pipeline Start----------\n");
 
         //Fetch 선언 및 Instruction Fetch
         MemoryFetch memoryFetch = new MemoryFetch(path);
@@ -35,6 +37,10 @@ public class Main extends Global {
         ALU alu = new ALU(controlSignal);
         Memory memory = new Memory(controlSignal);
 
+        //Latch 선언
+        IF_ID if_id = new IF_ID();
+        ID_EXE id_exe = new ID_EXE();
+
         int cycleCount = 1;
 
         while (pc != -1) {
@@ -42,14 +48,22 @@ public class Main extends Global {
             if(cycleCount % 1000000 == 0) {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
-            // instruction fetch
-            String inst = memoryFetch.fetch(pc);
-            String pcHex = Integer.toHexString(pc * 4);
-            Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s", cycleCount++, pcHex, memoryFetch.printHexInst(pc));
 
+            // instruction fetch
+            MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(pc);
+            String pcHex = Integer.toHexString(pc * 4);
+
+            //Latch
+            if_id.input(memoryFetchOutput.nextPC, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
+            Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount++, pcHex, if_id.inputHexInstruction);
+
+
+            //------------------------------------Start Decode Stage------------------------------------
             // instruction decode
-            DecodeOutput decodeOutput = decode.decodeInstruction(inst);
+            DecodeOutput decodeOutput = decode.decodeInstruction(if_id.instruction);
             decodeOutput.printDecodeStage();
+            Global.IF_IDValid = false;
+
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.regDstResult);
 
@@ -58,6 +72,14 @@ public class Main extends Global {
             registerOutput.acceptZeroExt(decodeOutput.zeroExt);
             registerOutput.acceptShamt(decodeOutput.shamt);
             registerOutput.printExecutionInput();
+
+            //------------------------------------Finish Decode Stage------------------------------------
+
+            //Latch
+            id_exe.input(controlSignal, nextPC, registerOutput.firstRegisterOutput,
+                    registerOutput.aluSrcResult, decodeOutput.rs, decodeOutput.rd);
+            Global.ID_EXEValid = false;
+
 
             //Execution
             AluOutput aluOutput = alu.process(registerOutput.firstValue, registerOutput.aluSrcResult);
@@ -76,12 +98,24 @@ public class Main extends Global {
             register.registerWrite(memoryOutput.memToRegResult);
             register.printExecutionWriteBack();
 
-            //pc Update
-            pcUpdate.setInstruction(inst);
-            pcUpdate.pcUpdate(registerOutput.firstRegisterOutput, aluOutput.aluCalcResult);
+//            //pc Update
+//            pcUpdate.setInstruction(memoryFetchOutput.instruction);
+//            pcUpdate.pcUpdate(registerOutput.firstRegisterOutput, aluOutput.aluCalcResult);
+//            Logger.println();
+
+            //latch Update
+            if_id.output(if_id.inputNextPc, if_id.inputInstruction, if_id.inputHexInstruction);
+            Global.IF_IDValid = true;
+            id_exe.output(id_exe.inputControlSignal, id_exe.inputNextPc, id_exe.inputReadData1,
+                    id_exe.inputAluSrcResult, id_exe.inputRs, id_exe.inputRd);
+            Global.ID_EXEValid = true;
+
+
+            //임시 pc update
+            pc = mux(controlSignal.jr, registerOutput.firstRegisterOutput, pc);
             Logger.println();
         }
-        System.out.printf("\nresult value R[2] : %d\n",Global.register[2]);
+        System.out.printf("\nresult value R[2] : %d\n", Global.register[2]);
      }
 
     public static  int mux(boolean signal, int trueVal, int falseVal) {
@@ -96,4 +130,5 @@ public class Main extends Global {
         register[29] = 0x1000000;
         register[31] = 0xFFFFFFFF;
     }
+
 }

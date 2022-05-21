@@ -17,7 +17,6 @@ public class Register {
     private int writeData;
     private int regDstResult;
 
-
     public Register(ControlSignal controlSignal) {
         this.controlSignal = controlSignal;
     }

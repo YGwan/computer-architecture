@@ -2,6 +2,7 @@ package com.CpuOutput;
 
 import com.Cpu.ControlSignal;
 import com.Logger;
+import com.Memory.Global;
 
 import static com.Main.mux;
 
@@ -44,6 +45,11 @@ public class DecodeOutput {
     }
 
     public void printDecodeStage() {
-        Logger.println("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d]\n", opcode, rs, rt);
+
+        if(Global.IF_IDValid) {
+            Logger.println("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d]\n", opcode, rs, rt);
+        } else  {
+            Logger.println("ID Stage -> NOP");
+        }
     }
 }

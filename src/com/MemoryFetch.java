@@ -58,25 +58,12 @@ public class MemoryFetch {
         return binaryInstructions;
     }
 
-    public void printBitInstruction() {
-        for (String binaryInstruction : binaryInstructions) {
-            System.out.println(binaryInstruction);
-        }
-    }
 
-    public void printhexInstruction() {
-        for (String hexInstruction : this.hexInstructions) {
-            System.out.println(hexInstruction);
-        }
-    }
-
-    public int size() {
-        return binaryInstructions.size();
-    }
 
     public MemoryFetchOutput fetch(int pc) {
         return new MemoryFetchOutput(
                 binaryInstructions.get(pc),
+                hexInstructions.get(pc),
                 pc+1
         );
     }
@@ -84,5 +71,24 @@ public class MemoryFetch {
     public String printHexInst(int pc) {
         return hexInstructions.get(pc);
     }
+
+
+
+//
+//    public int size() {
+//        return binaryInstructions.size();
+//    }
+//
+//    public void printBitInstruction() {
+//        for (String binaryInstruction : binaryInstructions) {
+//            System.out.println(binaryInstruction);
+//        }
+//    }
+//
+//    public void printHexInstruction() {
+//        for (String hexInstruction : this.hexInstructions) {
+//            System.out.println(hexInstruction);
+//        }
+//    }
 }
 
