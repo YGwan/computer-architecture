@@ -1,5 +1,7 @@
 package com;
 
+import com.CpuOutput.MemoryOutput;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,8 +74,11 @@ public class MemoryFetch {
         return binaryInstructions.size();
     }
 
-    public String fetch(int pc) {
-        return binaryInstructions.get(pc);
+    public MemoryFetchOutput fetch(int pc) {
+        return new MemoryFetchOutput(
+                binaryInstructions.get(pc),
+                pc+1
+        );
     }
 
     public String printHexInst(int pc) {
