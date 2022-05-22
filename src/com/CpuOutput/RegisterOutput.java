@@ -2,6 +2,7 @@ package com.CpuOutput;
 
 import com.Cpu.ControlSignal;
 import com.Logger;
+import com.Memory.Global;
 
 import static com.Main.mux;
 
@@ -49,7 +50,4 @@ public class RegisterOutput {
         firstValue = mux(controlSignal.sll, shamt, firstRegisterOutput);
     }
 
-    public void printExecutionInput() {
-        Logger.println("EX Input -> Input 1 : %d, Input 2 : %d\n", firstRegisterOutput, aluSrcResult);
-    }
 }

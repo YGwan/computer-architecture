@@ -2,6 +2,7 @@ package com.CpuOutput;
 
 import com.Cpu.ControlSignal;
 import com.Logger;
+import com.Memory.Global;
 
 import static com.Main.mux;
 
@@ -20,8 +21,6 @@ public class AluOutput {
         this.aluResult = aluResult;
     }
 
-
-
     public void acceptLoadUpperImm(int loadUpperImm) {
         this.loadUpperImm = loadUpperImm;
         set();
@@ -32,7 +31,15 @@ public class AluOutput {
     }
 
     public void printExecutionOutput() {
-        Logger.println("EX Stage -> result : %d\n", aluCalcResult);
+
+
+        if (Global.ID_EXEValid) {
+
+            Logger.println("EX Stage -> result : %d\n", aluResult);
+
+        } else {
+            Logger.println("EX Stage -> [nop]");
+        }
     }
 
 }

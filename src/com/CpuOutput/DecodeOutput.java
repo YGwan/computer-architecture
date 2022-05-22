@@ -49,7 +49,7 @@ public class DecodeOutput {
         if(Global.IF_IDValid) {
             Logger.println("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d]\n", opcode, rs, rt);
         } else  {
-            Logger.println("ID Stage -> NOP");
+            Logger.println("ID Stage -> [NOP]");
         }
     }
 }

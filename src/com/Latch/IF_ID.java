@@ -1,6 +1,5 @@
 package com.Latch;
 
-import com.Memory.Global;
 
 public class IF_ID {
 

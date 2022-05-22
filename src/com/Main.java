@@ -8,6 +8,7 @@ import com.CpuOutput.RegisterOutput;
 import com.Latch.ID_EXE;
 import com.Latch.IF_ID;
 import com.Memory.Global;
+import com.sun.xml.internal.xsom.XSUnionSimpleType;
 
 import java.io.IOException;
 
@@ -33,8 +34,8 @@ public class Main extends Global {
         ControlSignal controlSignal = new ControlSignal(); //Decode 함수에서 초기화 작업 진행
         Decode decode = new Decode(controlSignal);
         Register register = new Register(controlSignal);
-        PC pcUpdate = new PC(controlSignal);
-        ALU alu = new ALU(controlSignal);
+        PC pcUpdate = new PC();
+        ALU alu = new ALU();
         Memory memory = new Memory(controlSignal);
 
         //Latch 선언
@@ -44,14 +45,22 @@ public class Main extends Global {
         int cycleCount = 1;
 
         while (pc != -1) {
+
+            if(cycleCount > 20) {
+                Logger.LOGGING_SIGNAL = false;
+                Logger.LOGGING_COUNTER_SIGNAL = false;
+            }
+
             //total cycle 수 측정
             if(cycleCount % 1000000 == 0) {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
+
             // instruction fetch
             MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(pc);
             String pcHex = Integer.toHexString(pc * 4);
+            pc = nextPC;
 
             //Latch
             if_id.input(memoryFetchOutput.nextPC, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
@@ -62,28 +71,30 @@ public class Main extends Global {
             // instruction decode
             DecodeOutput decodeOutput = decode.decodeInstruction(if_id.instruction);
             decodeOutput.printDecodeStage();
-            Global.IF_IDValid = false;
 
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
-                    decodeOutput.rt, decodeOutput.regDstResult);
+                    decodeOutput.rt, decodeOutput.regDstResult, controlSignal);
 
             //ALUSrc를 위해 signExt ,zeroExt, shamt보내기
             registerOutput.acceptSignExt(decodeOutput.signExt);
             registerOutput.acceptZeroExt(decodeOutput.zeroExt);
             registerOutput.acceptShamt(decodeOutput.shamt);
-            registerOutput.printExecutionInput();
 
             //------------------------------------Finish Decode Stage------------------------------------
 
             //Latch
             id_exe.input(controlSignal, nextPC, registerOutput.firstRegisterOutput,
                     registerOutput.aluSrcResult, decodeOutput.rs, decodeOutput.rd);
-            Global.ID_EXEValid = false;
 
 
             //Execution
-            AluOutput aluOutput = alu.process(registerOutput.firstValue, registerOutput.aluSrcResult);
-            aluOutput.acceptLoadUpperImm(decodeOutput.loadUpperImm);
+            System.out.println("///////////////////");
+            System.out.println(id_exe.readData1);
+            System.out.println(id_exe.aluSrcResult);
+            System.out.println("///////////////////");
+
+            AluOutput aluOutput = alu.process(id_exe.readData1, id_exe.aluSrcResult, id_exe.controlSignal);
+            //aluOutput.acceptLoadUpperImm(decodeOutput.loadUpperImm);
             aluOutput.printExecutionOutput();
 
             //Memory Access
@@ -106,9 +117,10 @@ public class Main extends Global {
             //latch Update
             if_id.output(if_id.inputNextPc, if_id.inputInstruction, if_id.inputHexInstruction);
             Global.IF_IDValid = true;
+
             id_exe.output(id_exe.inputControlSignal, id_exe.inputNextPc, id_exe.inputReadData1,
                     id_exe.inputAluSrcResult, id_exe.inputRs, id_exe.inputRd);
-            Global.ID_EXEValid = true;
+            Global.ID_EXEValid = Global.InputID_EXEValid;
 
 
             //임시 pc update

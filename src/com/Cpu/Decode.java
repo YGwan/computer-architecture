@@ -17,7 +17,10 @@ public class Decode {
 
     public DecodeOutput decodeInstruction(String binaryInstruction) {
 
+        this.controlSignal.initailcontrolSignal();
+
         if (Global.IF_IDValid) {
+
             //변수 할당 부분
             String opcode = checkOpcodeOrFunc(binaryInstruction.substring(0, 6));
             int rs = readTobinaryString(binaryInstruction.substring(6, 11));
@@ -30,8 +33,8 @@ public class Decode {
             int loadUpperImm = setLoadUpperImm(binaryInstruction);
 
             //controlSignal 초기화 작업
-            this.controlSignal.initailcontrolSignal();
             this.controlSignal.setControlSignal(opcode, func);
+            Global.InputID_EXEValid = true;
 
             return new DecodeOutput(
                     controlSignal,

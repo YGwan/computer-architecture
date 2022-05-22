@@ -10,10 +10,6 @@ public class PC {
     ControlSignal controlSignal;
     String binaryInst;
 
-    public PC(ControlSignal controlSignal) {
-        this.controlSignal = controlSignal;
-    }
-
     public void setInstruction(String binaryInst) {
         this.binaryInst = binaryInst;
     }

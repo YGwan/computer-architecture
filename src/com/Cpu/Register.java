@@ -12,16 +12,18 @@ import static com.Main.mux;
 
 public class Register {
 
+    ControlSignal ExeControlSignal;
     ControlSignal controlSignal;
 
     private int writeData;
     private int regDstResult;
 
-    public Register(ControlSignal controlSignal) {
-        this.controlSignal = controlSignal;
+    public Register(ControlSignal WBControlSignal) {
+        this.controlSignal = WBControlSignal;
     }
 
-    public RegisterOutput registerCalc(int rs, int rt, int writeRegister) {
+    public RegisterOutput registerCalc(int rs, int rt, int writeRegister, ControlSignal controlSignal) {
+        this.ExeControlSignal = controlSignal;
         this.regDstResult = writeRegister;
 
         return new RegisterOutput(
