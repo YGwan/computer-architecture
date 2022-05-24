@@ -3,6 +3,8 @@ package com.Cpu;
 import com.CpuOutput.DecodeOutput;
 import com.Memory.Global;
 
+import static com.Memory.Global.pc;
+
 /*
  * 명령어 처리 - 구간 별로 나누기
  * RegDst mux 구현
@@ -30,6 +32,9 @@ public class Decode {
         ControlSignal controlSignal = new ControlSignal();
         controlSignal.setControlSignal(opcode, func);
 
+        int jumpAddr = jumpAddr(binaryInstruction);
+        int branchAddr = branchAddr(binaryInstruction);
+
         //InputID_EXEValid true로 만들기
         Global.InputID_EXEValid = true;
 
@@ -43,7 +48,9 @@ public class Decode {
                 func,
                 signExt,
                 zeroExt,
-                loadUpperImm
+                loadUpperImm,
+                jumpAddr,
+                branchAddr
         );
     }
 
@@ -92,6 +99,32 @@ public class Decode {
             return readTobinaryString(loadUpperImmBinaryString.toString());
         }
     }
+
+
+    //jumpAddr 구하기
+    //JumpAddr = { PC+4[31:28], address, 2’b0 }
+    private int jumpAddr(String binaryInst) {
+
+            String pcFirst4bits = String.format("%04d", (pc * 4 >> 28) & 0xf);
+            String address = binaryInst.substring(6, 32);
+            String jumpAddr = pcFirst4bits + address + "00";
+            return Integer.parseInt(jumpAddr, 2);
+    }
+
+    // BranchAddr 구하기
+    // BranchAddr = { 14{immediate[15]}, immediate, 2’b0 }
+    private int branchAddr(String binaryInst) {
+            String immediate = binaryInst.substring(16, 32);
+            if (immediate.charAt(0) == '1') {
+                String branchAddr = "11111111111111" + immediate + "00";
+                return Integer.parseUnsignedInt(branchAddr, 2);
+            } else {
+                String branchAddr = "00000000000000" + immediate + "00";
+                return Integer.parseInt(branchAddr, 2);
+            }
+
+    }
+
 
     // 연산에 필요한 함수 구현 (parsing 함수 부분)
     //2진수를 16진수로 변환

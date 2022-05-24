@@ -37,7 +37,7 @@ public class AluOutput {
 
         if (Global.ID_EXEValid) {
 
-            Logger.println("EX Stage -> result : %d\n", aluCalcResult);
+            Logger.println("EX Stage -> result : %d, ", aluCalcResult);
 
         } else {
             Logger.println("EX Stage -> [NOP]");

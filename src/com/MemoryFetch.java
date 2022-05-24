@@ -63,12 +63,20 @@ public class MemoryFetch {
 
     public MemoryFetchOutput fetch(int pc) {
 
-        Global.InputIF_IDValid = true;
-        return new MemoryFetchOutput(
-                binaryInstructions.get(pc),
-                hexInstructions.get(pc),
-                pc+1
-        );
+        if(Global.FetchValid) {
+            Global.InputIF_IDValid = true;
+            return new MemoryFetchOutput(
+                    binaryInstructions.get(pc),
+                    hexInstructions.get(pc),
+                    pc + 1
+            );
+        } else {
+            return new MemoryFetchOutput(
+                    null,
+                    null,
+                    pc + 1
+            );
+        }
     }
 
     public String printHexInst(int pc) {

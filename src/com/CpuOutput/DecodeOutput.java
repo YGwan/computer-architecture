@@ -21,6 +21,8 @@ public class DecodeOutput {
     public int signExt;
     public int zeroExt;
     public int loadUpperImm;
+    public int jumpAddr;
+    public int branchAddr;
 
     public static DecodeOutput NONE = new DecodeOutput(
             null,
@@ -32,11 +34,13 @@ public class DecodeOutput {
             null,
             0,
             0,
+            0,
+            0,
             0
     );
 
     public DecodeOutput(ControlSignal controlSignal, String opcode, int rs, int rt, int rd,
-                        int shamt, String func, int signExt, int zeroExt, int loadUpperImm) {
+                        int shamt, String func, int signExt, int zeroExt, int loadUpperImm, int jumpAddr, int branchAddr) {
 
         this.controlSignal = controlSignal;
         this.opcode = opcode;
@@ -48,6 +52,8 @@ public class DecodeOutput {
         this.signExt = signExt;
         this.zeroExt = zeroExt;
         this.loadUpperImm = loadUpperImm;
+        this.jumpAddr = jumpAddr;
+        this.branchAddr = branchAddr;
         set();
     }
 

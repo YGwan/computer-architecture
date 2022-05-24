@@ -15,14 +15,6 @@ public class ALU {
 
         if (Global.ID_EXEValid) {
 
-
-            System.out.println("///////////////");
-            System.out.println(Integer.toHexString(firstRegisterResult));
-            System.out.println(Integer.toHexString(aluSrcResult));
-            System.out.println(controlSignal.inst);
-            System.out.println("///////////////");
-
-
             //기본 연산 - (+)
             if (controlSignal.aluControl == 0) {
                 aluResult = firstRegisterResult + aluSrcResult;
@@ -32,6 +24,7 @@ public class ALU {
 
             //비교 연산 - slti
             else if (controlSignal.aluControl == 1) {
+
                 if (firstRegisterResult < aluSrcResult) {
                     Global.InputEXE_MEMValid = true;
                     return new AluOutput(controlSignal, 1);

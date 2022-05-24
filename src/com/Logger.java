@@ -25,4 +25,9 @@ public class Logger {
         if (!LOGGING_SIGNAL) return;
         System.out.printf(msg, args);
     }
+
+    public static void print(String msg) {
+        if (!LOGGING_SIGNAL) return;
+        System.out.print(msg);
+    }
 }

@@ -21,10 +21,13 @@ public class MemoryOutput {
         this.memoryCalcResult = memoryCalcResult;
     }
 
-    public void acceptAluResult(int aluResult) {
-        if(Global.EXE_MEMValid) {
-            this.aluResult = aluResult;
-            set();
+    public void acceptAluResult(int aluResult, boolean instEndPoint) {
+
+        if(!instEndPoint) {
+            if (Global.EXE_MEMValid) {
+                this.aluResult = aluResult;
+                set();
+            }
         }
     }
 
