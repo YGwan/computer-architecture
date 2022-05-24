@@ -9,15 +9,11 @@ import com.Memory.Global;
  * */
 public class Decode {
 
-    ControlSignal controlSignal;
 
-    public Decode(ControlSignal controlSignal) {
-        this.controlSignal = controlSignal;
-    }
 
-    public DecodeOutput decodeInstruction(String binaryInstruction) {
+    public DecodeOutput decodeInstruction(String binaryInstruction, ControlSignal controlSignal) {
 
-        this.controlSignal.initailcontrolSignal();
+
 
         if (Global.IF_IDValid) {
 
@@ -33,7 +29,11 @@ public class Decode {
             int loadUpperImm = setLoadUpperImm(binaryInstruction);
 
             //controlSignal 초기화 작업
-            this.controlSignal.setControlSignal(opcode, func);
+            controlSignal.initailcontrolSignal();
+            controlSignal.setControlSignal(opcode, func);
+
+
+            //InputID_EXEValid true로 만들기
             Global.InputID_EXEValid = true;
 
             return new DecodeOutput(
@@ -49,7 +49,7 @@ public class Decode {
                     loadUpperImm
             );
         } else return new DecodeOutput(
-                controlSignal,
+                null,
                 null,
                 0,
                 0,
@@ -59,7 +59,6 @@ public class Decode {
                 0,
                 0,
                 0
-
         );
     }
     //signExt 만들기

@@ -1,6 +1,7 @@
 package com;
 
 import com.CpuOutput.MemoryOutput;
+import com.Memory.Global;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -61,6 +62,8 @@ public class MemoryFetch {
 
 
     public MemoryFetchOutput fetch(int pc) {
+
+        Global.InputIF_IDValid = true;
         return new MemoryFetchOutput(
                 binaryInstructions.get(pc),
                 hexInstructions.get(pc),

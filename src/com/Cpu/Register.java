@@ -12,44 +12,54 @@ import static com.Main.mux;
 
 public class Register {
 
-    ControlSignal ExeControlSignal;
-    ControlSignal controlSignal;
 
     private int writeData;
-    private int regDstResult;
 
-    public Register(ControlSignal WBControlSignal) {
-        this.controlSignal = WBControlSignal;
-    }
 
-    public RegisterOutput registerCalc(int rs, int rt, int writeRegister, ControlSignal controlSignal) {
-        this.ExeControlSignal = controlSignal;
-        this.regDstResult = writeRegister;
+    public RegisterOutput registerCalc(int rs, int rt, ControlSignal controlSignal) {
 
-        return new RegisterOutput(
-                controlSignal,
-                Global.register[rs],
-                Global.register[rt]
-        );
-    }
 
-    public void registerWrite(int memToRegResult) {
-        this.writeData = mux(controlSignal.jal, Global.pc + 2, memToRegResult);
-        if (controlSignal.regWrite) {
-            Global.register[regDstResult] = writeData;
+        if(Global.IF_IDValid) {
+            return new RegisterOutput(
+                    controlSignal,
+                    Global.register[rs],
+                    Global.register[rt]
+            );
+        } else {
+            return new RegisterOutput(
+                    null,
+                    0,
+                    0
+            );
         }
     }
 
-    public void printExecutionWriteBack() {
-        if (controlSignal.regWrite) {
-            if (controlSignal.jal) {
-                Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData * 4);
-            } else {
-                Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData);
+    public void registerWrite(ControlSignal controlSignal, int memToRegResult, int regDstResult) {
+
+        if(Global.MEM_WBValid) {
+            this.writeData = mux(controlSignal.jal, Global.pc + 2, memToRegResult);
+            if (controlSignal.regWrite) {
+                Global.register[regDstResult] = writeData;
             }
-            Global.register[regDstResult] = writeData;
+        }
+    }
+
+    public void printExecutionWriteBack(ControlSignal controlSignal, int regDstResult) {
+
+        if (Global.MEM_WBValid) {
+
+            if (controlSignal.regWrite) {
+                if (controlSignal.jal) {
+                    Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData * 4);
+                } else {
+                    Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData);
+                }
+                Global.register[regDstResult] = writeData;
+            } else {
+                Logger.println("WB Stage -> ");
+            }
         } else {
-            Logger.println("WB Stage -> ");
+            Logger.println("WB Stage -> [NOP]");
         }
     }
 

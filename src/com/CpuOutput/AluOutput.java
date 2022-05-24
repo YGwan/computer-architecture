@@ -14,7 +14,7 @@ public class AluOutput {
     ControlSignal controlSignal;
     public int aluCalcResult;
     private int loadUpperImm;
-    private int aluResult;
+    private final int aluResult;
 
     public AluOutput(ControlSignal controlSignal, int aluResult) {
         this.controlSignal = controlSignal;
@@ -27,7 +27,9 @@ public class AluOutput {
     }
 
     private void set() {
-        aluCalcResult = mux(controlSignal.lui, loadUpperImm, aluResult);
+        if(Global.ID_EXEValid) {
+            aluCalcResult = mux(controlSignal.lui, loadUpperImm, aluResult);
+        }
     }
 
     public void printExecutionOutput() {
@@ -35,10 +37,10 @@ public class AluOutput {
 
         if (Global.ID_EXEValid) {
 
-            Logger.println("EX Stage -> result : %d\n", aluResult);
+            Logger.println("EX Stage -> result : %d\n", aluCalcResult);
 
         } else {
-            Logger.println("EX Stage -> [nop]");
+            Logger.println("EX Stage -> [NOP]");
         }
     }
 

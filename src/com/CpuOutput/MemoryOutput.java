@@ -1,6 +1,7 @@
 package com.CpuOutput;
 
 import com.Cpu.ControlSignal;
+import com.Memory.Global;
 
 import static com.Main.mux;
 
@@ -21,12 +22,16 @@ public class MemoryOutput {
     }
 
     public void acceptAluResult(int aluResult) {
-        this.aluResult = aluResult;
-        set();
+        if(Global.EXE_MEMValid) {
+            this.aluResult = aluResult;
+            set();
+        }
     }
 
     //MemtoReg 처리 부분
     private void set() {
-        memToRegResult = mux(controlSignal.memToReg, memoryCalcResult, aluResult);
+        if (Global.EXE_MEMValid) {
+            memToRegResult = mux(controlSignal.memToReg, memoryCalcResult, aluResult);
+        }
     }
 }

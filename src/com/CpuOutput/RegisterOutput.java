@@ -45,9 +45,12 @@ public class RegisterOutput {
 
     //ALUSrc, sll 처리 부분
     private void set() {
-        aluSrcResult = mux(controlSignal.aluSrc, signExt, secondRegisterOutput);
-        aluSrcResult = mux(controlSignal.ori, zeroExt, aluSrcResult);
-        firstValue = mux(controlSignal.sll, shamt, firstRegisterOutput);
+
+        if(Global.IF_IDValid) {
+            aluSrcResult = mux(controlSignal.aluSrc, signExt, secondRegisterOutput);
+            aluSrcResult = mux(controlSignal.ori, zeroExt, aluSrcResult);
+            firstValue = mux(controlSignal.sll, shamt, firstRegisterOutput);
+        }
     }
 
 }

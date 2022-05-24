@@ -9,7 +9,7 @@ import static com.Main.mux;
 
 public class DecodeOutput {
 
-    ControlSignal controlSignal;
+    public ControlSignal controlSignal;
     public String opcode;
     public int rs;
     public int rt;
@@ -40,11 +40,14 @@ public class DecodeOutput {
 
     //regDst 처리 부분
     private void set() {
-        regDstResult = mux(controlSignal.regDst, rd, rt);
-        regDstResult = mux(controlSignal.jal, 31, regDstResult);
+        if(Global.IF_IDValid) {
+            regDstResult = mux(controlSignal.regDst, rd, rt);
+            regDstResult = mux(controlSignal.jal, 31, regDstResult);
+        }
+
     }
 
-    public void printDecodeStage() {
+    public void printDecodeStage(String opcode, int rs, int rt) {
 
         if(Global.IF_IDValid) {
             Logger.println("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d]\n", opcode, rs, rt);
