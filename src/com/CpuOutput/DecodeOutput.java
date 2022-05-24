@@ -22,6 +22,19 @@ public class DecodeOutput {
     public int zeroExt;
     public int loadUpperImm;
 
+    public static DecodeOutput NONE = new DecodeOutput(
+            null,
+            null,
+            0,
+            0,
+            0,
+            0,
+            null,
+            0,
+            0,
+            0
+    );
+
     public DecodeOutput(ControlSignal controlSignal, String opcode, int rs, int rt, int rd,
                         int shamt, String func, int signExt, int zeroExt, int loadUpperImm) {
 
@@ -50,7 +63,7 @@ public class DecodeOutput {
     public void printDecodeStage(String opcode, int rs, int rt) {
 
         if(Global.IF_IDValid) {
-            Logger.println("ID Stage -> opcode : %s, rs : R[%d], rt: R[%d]\n", opcode, rs, rt);
+            Logger.println("ID Stage -> opcode : %s[%s], rs : R[%d], rt: R[%d]\n", opcode, controlSignal.inst, rs, rt );
         } else  {
             Logger.println("ID Stage -> [NOP]");
         }

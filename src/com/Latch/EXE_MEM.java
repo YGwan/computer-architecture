@@ -4,12 +4,12 @@ import com.Cpu.ControlSignal;
 
 public class EXE_MEM {
 
-    public ControlSignal inputControlSignal;
-    public int inputNextPc;
-    public int inputRsValue;
+    private ControlSignal inputControlSignal;
+    private int inputNextPc;
+    private int inputRsValue;
     public int inputAluCalcResult;
-    public int inputRtValue;
-    public int inputRegDstValue;
+    private int inputRtValue;
+    private int inputRegDstValue;
 
     public ControlSignal controlSignal;
     public int nextPc;
@@ -29,8 +29,7 @@ public class EXE_MEM {
 
     }
 
-    public void output(ControlSignal inputControlSignal, int inputNextPc, int inputRsValue, int inputRtValue,
-                   int inputAluCalcResult, int inputRegDstValue) {
+    public void output() {
         this.controlSignal = inputControlSignal;
         this.nextPc = inputNextPc;
         this.rsValue = inputRsValue;

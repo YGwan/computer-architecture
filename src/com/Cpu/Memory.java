@@ -6,17 +6,13 @@ import com.Memory.Global;
 
 public class Memory {
 
-    private final int memesize = 0x1000000;
+    private final int memesize = 0x4000000;
     public int[] dataMemory = new int[memesize];
 
     //MemRead
     public MemoryOutput read(int address, ControlSignal controlSignal) {
 
         if (Global.EXE_MEMValid) {
-
-            System.out.println("////////////////");
-            System.out.println(controlSignal.inst);
-            System.out.println("////////////////");
 
             if (controlSignal.memRead) {
                 Global.InputMEM_WBValid = true;

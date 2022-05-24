@@ -29,7 +29,6 @@ public class Main extends Global {
 //        memoryFetch.printhexInstruction();
 
         //객체 생성 - 하드웨어 컴포넌트 생성
-        ControlSignal controlSignal = new ControlSignal(); //Decode 함수에서 초기화 작업 진행
         Decode decode = new Decode();
         Register register = new Register();
         PC pcUpdate = new PC();
@@ -70,9 +69,8 @@ public class Main extends Global {
 
             //------------------------------------Start Decode Stage------------------------------------
             // instruction decode
-            DecodeOutput decodeOutput = decode.decodeInstruction(if_id.instruction, controlSignal);
+            DecodeOutput decodeOutput = decode.decodeInstruction(if_id.instruction);
             decodeOutput.printDecodeStage(decodeOutput.opcode, decodeOutput.rs, decodeOutput.rt);
-
 
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.controlSignal);
@@ -82,6 +80,7 @@ public class Main extends Global {
             registerOutput.acceptZeroExt(decodeOutput.zeroExt);
             registerOutput.acceptShamt(decodeOutput.shamt);
 
+
             //------------------------------------Finish Decode Stage------------------------------------
 
             //------------------------------------Start Execution Stage------------------------------------
@@ -89,7 +88,6 @@ public class Main extends Global {
             //Latch
             id_exe.input(decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
                     registerOutput.aluSrcResult, decodeOutput.regDstResult);
-
 
             //Execution
 
@@ -102,22 +100,27 @@ public class Main extends Global {
 
             //-----------------------------------Start MemoryAccess Stage------------------------------------
 
-            exe_mem.input(id_exe.controlSignal, id_exe.nextPc, id_exe.readData1, //readData1 -> jr때문에 임시로 받음
+            //Latch
+            exe_mem.input(id_exe.controlSignal, id_exe.nextPc, id_exe.readData1, //readData1 -> jr때문에 받음
                     id_exe.readData2, aluOutput.aluCalcResult, id_exe.regDstResult);
 
             //Memory Access
             MemoryOutput memoryOutput = memory.read(exe_mem.aluCalcResult, exe_mem.controlSignal);
+
             memory.write(exe_mem.aluCalcResult, exe_mem.rtValue, exe_mem.controlSignal);
 
-            //MemtoReg를 위한 값 보내기
+            //MemToReg 위한 값 보내기
             memoryOutput.acceptAluResult(aluOutput.aluCalcResult);
             memory.printExecutionMemoryAccess(exe_mem.controlSignal, exe_mem.aluCalcResult, exe_mem.rtValue);
 
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
 
 
+
+
             //--------------------------------------Start WriteBack Stage------------------------------------
 
+            //Latch
             mem_wb.input(exe_mem.controlSignal, memoryOutput.memToRegResult, exe_mem.regDstValue);
             //writeBack
             register.registerWrite(mem_wb.controlSignal,  mem_wb.memToRegResult, mem_wb.regDst);
@@ -131,15 +134,11 @@ public class Main extends Global {
 //            Logger.println();
 
             //latch Update
-            if_id.output(if_id.inputNextPc, if_id.inputInstruction, if_id.inputHexInstruction);
+            if_id.output();
+            id_exe.output();
+            exe_mem.output();
+            mem_wb.output();
 
-            id_exe.output(id_exe.inputControlSignal, id_exe.inputNextPc, id_exe.inputReadData1, id_exe.inputReadData2,
-                    id_exe.inputAluSrcResult, id_exe.inputRegDstResult);
-
-            exe_mem.output(exe_mem.inputControlSignal, exe_mem.inputNextPc, exe_mem.inputRsValue,
-                    exe_mem.inputRtValue, exe_mem.inputAluCalcResult, exe_mem.inputRegDstValue);
-
-            mem_wb.output(mem_wb.inputControlSignal, mem_wb.inputMemToRegResult, mem_wb.inputRegDst);
 
 
             //Valid값 갱신
@@ -150,7 +149,7 @@ public class Main extends Global {
 
 
             //임시 pc update
-            pc = mux(controlSignal.jr, registerOutput.firstRegisterOutput, pc);
+//            pc = mux(exe_mem.controlSignal.jr, registerOutput.firstRegisterOutput, pc);
             Logger.println();
 
         }

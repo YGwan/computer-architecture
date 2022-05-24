@@ -10,57 +10,43 @@ import com.Memory.Global;
 public class Decode {
 
 
+    public DecodeOutput decodeInstruction(String binaryInstruction) {
 
-    public DecodeOutput decodeInstruction(String binaryInstruction, ControlSignal controlSignal) {
+        if (!Global.IF_IDValid) {
+            return DecodeOutput.NONE;
+        }
 
+        //변수 할당 부분
+        String opcode = checkOpcodeOrFunc(binaryInstruction.substring(0, 6));
+        int rs = readTobinaryString(binaryInstruction.substring(6, 11));
+        int rt = readTobinaryString(binaryInstruction.substring(11, 16));
+        int rd = readTobinaryString(binaryInstruction.substring(16, 21));
+        int shamt = readTobinaryString(binaryInstruction.substring(21, 26));
+        String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
+        int signExt = setSignExtImm(binaryInstruction);
+        int zeroExt = setZeroExt(binaryInstruction);
+        int loadUpperImm = setLoadUpperImm(binaryInstruction);
 
+        ControlSignal controlSignal = new ControlSignal();
+        controlSignal.setControlSignal(opcode, func);
 
-        if (Global.IF_IDValid) {
+        //InputID_EXEValid true로 만들기
+        Global.InputID_EXEValid = true;
 
-            //변수 할당 부분
-            String opcode = checkOpcodeOrFunc(binaryInstruction.substring(0, 6));
-            int rs = readTobinaryString(binaryInstruction.substring(6, 11));
-            int rt = readTobinaryString(binaryInstruction.substring(11, 16));
-            int rd = readTobinaryString(binaryInstruction.substring(16, 21));
-            int shamt = readTobinaryString(binaryInstruction.substring(21, 26));
-            String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
-            int signExt = setSignExtImm(binaryInstruction);
-            int zeroExt = setZeroExt(binaryInstruction);
-            int loadUpperImm = setLoadUpperImm(binaryInstruction);
-
-            //controlSignal 초기화 작업
-            controlSignal.initailcontrolSignal();
-            controlSignal.setControlSignal(opcode, func);
-
-
-            //InputID_EXEValid true로 만들기
-            Global.InputID_EXEValid = true;
-
-            return new DecodeOutput(
-                    controlSignal,
-                    opcode,
-                    rs,
-                    rt,
-                    rd,
-                    shamt,
-                    func,
-                    signExt,
-                    zeroExt,
-                    loadUpperImm
-            );
-        } else return new DecodeOutput(
-                null,
-                null,
-                0,
-                0,
-                0,
-                0,
-                null,
-                0,
-                0,
-                0
+        return new DecodeOutput(
+                controlSignal,
+                opcode,
+                rs,
+                rt,
+                rd,
+                shamt,
+                func,
+                signExt,
+                zeroExt,
+                loadUpperImm
         );
     }
+
     //signExt 만들기
     //SignExtImm = { 16{immediate[15]}, immediate
     public int setSignExtImm(String binaryInstruction) {

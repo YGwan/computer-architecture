@@ -15,6 +15,14 @@ public class ALU {
 
         if (Global.ID_EXEValid) {
 
+
+            System.out.println("///////////////");
+            System.out.println(Integer.toHexString(firstRegisterResult));
+            System.out.println(Integer.toHexString(aluSrcResult));
+            System.out.println(controlSignal.inst);
+            System.out.println("///////////////");
+
+
             //기본 연산 - (+)
             if (controlSignal.aluControl == 0) {
                 aluResult = firstRegisterResult + aluSrcResult;

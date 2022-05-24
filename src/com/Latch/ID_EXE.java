@@ -5,11 +5,11 @@ import com.Cpu.ControlSignal;
 public class ID_EXE {
 
     public ControlSignal inputControlSignal;
-    public int inputNextPc;
-    public int inputReadData1;
-    public int inputReadData2;
-    public int inputAluSrcResult;
-    public int inputRegDstResult;
+    private int inputNextPc;
+    private int inputReadData1;
+    private int inputReadData2;
+    private int inputAluSrcResult;
+    private int inputRegDstResult;
 
     public ControlSignal controlSignal;
     public int nextPc;
@@ -28,14 +28,13 @@ public class ID_EXE {
 
     }
 
-    public void output(ControlSignal inputControlSignal, int inputNextPc, int inputReadData1, int inputReadData2,
-                       int inputAluSrcResult, int inputRd) {
+    public void output() {
         this.controlSignal = inputControlSignal;
         this.nextPc = inputNextPc;
         this.readData1 = inputReadData1;
         this.readData2 = inputReadData2;
         this.aluSrcResult = inputAluSrcResult;
-        this.regDstResult = inputRd;
+        this.regDstResult = inputRegDstResult;
     }
 
 

@@ -5,9 +5,9 @@ import com.Cpu.ControlSignal;
 
 public class MEM_WB {
 
-    public ControlSignal inputControlSignal;
-    public int inputMemToRegResult;
-    public int inputRegDst;
+    private ControlSignal inputControlSignal;
+    private int inputMemToRegResult;
+    private int inputRegDst;
 
     public ControlSignal controlSignal;
     public int memToRegResult;
@@ -19,8 +19,7 @@ public class MEM_WB {
         this.inputRegDst = regDst;
     }
 
-
-    public void output(ControlSignal inputControlSignal, int inputMemToRegResult, int inputRegDst) {
+    public void output() {
         this.controlSignal = inputControlSignal;
         this.memToRegResult = inputMemToRegResult;
         this.regDst = inputRegDst;

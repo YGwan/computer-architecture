@@ -22,7 +22,7 @@ public class ControlSignal {
     public int aluControl;
     public String inst;
 
-    public void initailcontrolSignal() {
+    public ControlSignal() {
         regDst = false;
         aluSrc = false;
         memToReg = false;
