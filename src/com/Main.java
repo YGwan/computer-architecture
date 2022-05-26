@@ -5,7 +5,10 @@ import com.CpuOutput.AluOutput;
 import com.CpuOutput.DecodeOutput;
 import com.CpuOutput.MemoryOutput;
 import com.CpuOutput.RegisterOutput;
-import com.Latch.*;
+import com.Latch.EXE_MEM;
+import com.Latch.ID_EXE;
+import com.Latch.IF_ID;
+import com.Latch.MEM_WB;
 import com.Memory.Global;
 
 import java.io.IOException;
@@ -21,12 +24,14 @@ public class Main extends Global {
 
         String path = "source/simple.bin";
 
-        Logger.println("\n----------pipeline Start----------\n");
+
+        
+        Logger.println("\n--------------pipeline Start--------------\n");
 
         //Fetch 선언 및 Instruction Fetch
         MemoryFetch memoryFetch = new MemoryFetch(path);
-//        memoryFetch.printBitInstruction();
-//        memoryFetch.printhexInstruction();
+        //memoryFetch.printBitInstruction();
+        //memoryFetch.printHexInstruction();
 
         //객체 생성 - 하드웨어 컴포넌트 생성
         Decode decode = new Decode();
@@ -40,7 +45,6 @@ public class Main extends Global {
         ID_EXE id_exe = new ID_EXE();
         EXE_MEM exe_mem = new EXE_MEM();
         MEM_WB mem_wb = new MEM_WB();
-        Latches latches = new Latches();
 
         int cycleCount = 1;
 
@@ -66,7 +70,7 @@ public class Main extends Global {
             //Latch
             if_id.input(memoryFetchOutput.nextPC, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
 
-            if(FetchValid) {
+            if (FetchValid) {
                 Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount++, pcHex, if_id.inputHexInstruction);
             } else {
                 Logger.println("cyl %d, IF Stage -> [NOP]\n", cycleCount++);
@@ -135,7 +139,6 @@ public class Main extends Global {
 
             //Latch
             mem_wb.input(exe_mem.controlSignal, memoryOutput.memToRegResult, exe_mem.regDstValue, exe_mem.instEndPoint);
-
 
 
             //--------------------------------------Start WriteBack Stage------------------------------------
