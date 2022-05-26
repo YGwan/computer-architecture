@@ -1,10 +1,7 @@
 package com;
 
 import com.Cpu.*;
-import com.CpuOutput.AluOutput;
-import com.CpuOutput.DecodeOutput;
-import com.CpuOutput.MemoryOutput;
-import com.CpuOutput.RegisterOutput;
+import com.CpuOutput.*;
 import com.Latch.EXE_MEM;
 import com.Latch.ID_EXE;
 import com.Latch.IF_ID;
@@ -94,17 +91,45 @@ public class Main extends Global {
 
             //Latch
             id_exe.input(decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    registerOutput.aluSrcResult, decodeOutput.regDstResult, decodeOutput.jumpAddr, decodeOutput.branchAddr);
+                    registerOutput.aluSrcResult, decodeOutput.regDstResult, decodeOutput.jumpAddr, decodeOutput.branchAddr, decodeOutput.loadUpperImm);
+
+
+            //------------------------------------Data forwarding 처리--------------------------------------
+
+            AluOutput aluOutput;
+
+            if(onDataForwarding) {
+                DataForwarding dataForwarding = new DataForwarding();
+
+
+
+                int signalA = dataForwarding.forwardA(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
+                        exe_mem.regDstValue, decodeOutput.rs, mem_wb.regDst);
+
+                int signalB = dataForwarding.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
+                        exe_mem.regDstValue, decodeOutput.rt, mem_wb.regDst, decodeOutput.rs);
+
+                // forwardA･B MUX
+                int aluInputData1 = forwardMux(signalA, id_exe.readData1,exe_mem.aluCalcResult, mem_wb.memToRegResult);
+                int aluInputData2 = forwardMux(signalB, id_exe.aluSrcResult,exe_mem.aluCalcResult, mem_wb.memToRegResult);
+                aluOutput = alu.process(aluInputData1, aluInputData2, id_exe.controlSignal);
+
+            }
 
             //------------------------------------Start Execution Stage------------------------------------
 
             //Execution
-            AluOutput aluOutput = alu.process(id_exe.readData1, id_exe.aluSrcResult, id_exe.controlSignal);
-            aluOutput.acceptLoadUpperImm(decodeOutput.loadUpperImm);
+            else {
+                aluOutput = alu.process(id_exe.readData1, id_exe.aluSrcResult, id_exe.controlSignal);
+            }
+
+            aluOutput.acceptLoadUpperImm(id_exe.loadUpper);
             aluOutput.printExecutionOutput();
+
 
             //pc Update
             pcUpdate.pcUpdate(id_exe.controlSignal, id_exe.readData1, aluOutput.aluCalcResult, id_exe.jumpAddr, id_exe.branchAddr);
+
 
             //-----------------------------------pc == -1 일때 처리 -----------------------------------------
 
@@ -131,7 +156,7 @@ public class Main extends Global {
 
 
             //MemToReg 위한 값 보내기
-            memoryOutput.acceptAluResult(aluOutput.aluCalcResult, exe_mem.instEndPoint);
+            memoryOutput.acceptAluResult(exe_mem.aluCalcResult, exe_mem.instEndPoint);
             memory.printExecutionMemoryAccess(exe_mem.controlSignal, exe_mem.aluCalcResult, exe_mem.rtValue, exe_mem.instEndPoint);
 
 
@@ -149,7 +174,6 @@ public class Main extends Global {
             Logger.println();
 
             //--------------------------------------Finish WriteBack Stage------------------------------------
-
 
             //latch Update
             if_id.output();
@@ -176,6 +200,28 @@ public class Main extends Global {
             return trueVal;
         }
         return falseVal;
+    }
+
+    public static int forwardMux(int signal, int basic, int exe_memReturnVale, int mem_wbReturnValue) {
+
+        int returnValue;
+
+        switch (signal) {
+            case 0 :
+                returnValue =  basic;
+                break;
+            case 1 :
+                returnValue = exe_memReturnVale;
+                break;
+            case 2 :
+                returnValue = mem_wbReturnValue;
+                break;
+
+            default:
+                returnValue = 0;
+        }
+
+        return returnValue;
     }
 
     private static void initializedRegister() {

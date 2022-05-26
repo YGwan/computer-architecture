@@ -6,7 +6,7 @@ import com.Memory.Global;
 
 public class Memory {
 
-    private final int memesize = 0x4000000;
+    private final int memesize = 0x1000000;
     public int[] dataMemory = new int[memesize];
 
     //MemRead

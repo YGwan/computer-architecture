@@ -22,5 +22,6 @@ public class Global {
     public static boolean InputEXE_MEMValid = false;
     public static boolean InputMEM_WBValid = false;
 
-    public static boolean Valid = false;
+    public static boolean onDataForwarding = true;
+
 }

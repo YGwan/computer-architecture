@@ -1,7 +1,7 @@
-package com;
+package com.Cpu;
 
-import com.CpuOutput.MemoryOutput;
 import com.Memory.Global;
+import com.CpuOutput.MemoryFetchOutput;
 
 import java.io.FileInputStream;
 import java.io.IOException;
