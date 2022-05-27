@@ -123,8 +123,8 @@ public class Main extends Global {
 
 
                 // forwardA･B MUX
-                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, mem_wb.memToRegResult);
-                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, mem_wb.memToRegResult);
+                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, mem_wb.finalAluResult);
+                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, mem_wb.finalAluResult);
 
 //                System.out.println("////////////////");
 //                System.out.println(aluInputData1);
@@ -190,20 +190,21 @@ public class Main extends Global {
 
 
             //MemToReg 위한 값 보내기
-            memoryOutput.acceptAluResult(exe_mem.aluResult, exe_mem.instEndPoint);
             memory.printExecutionMemoryAccess(exe_mem.controlSignal, exe_mem.aluResult, exe_mem.rtValue, exe_mem.instEndPoint);
 
 
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
 
             //Latch
-            mem_wb.input(exe_mem.controlSignal, memoryOutput.memToRegResult, exe_mem.regDstValue, exe_mem.instEndPoint);
+            mem_wb.input(exe_mem.controlSignal, finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
 
 
             //--------------------------------------Start WriteBack Stage------------------------------------
 
+            //MemToReg 값 구분 MUX
+            int memToRegValue = register.memToRegSet(mem_wb.controlSignal, mem_wb.memoryCalcResult, mem_wb.finalAluResult);
             //writeBack
-            register.registerWrite(mem_wb.controlSignal, mem_wb.memToRegResult, mem_wb.regDst);
+            register.registerWrite(mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
             register.printExecutionWriteBack(mem_wb.controlSignal, mem_wb.regDst);
             Logger.println();
 

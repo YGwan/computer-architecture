@@ -34,6 +34,15 @@ public class Register {
         }
     }
 
+    //WriteBack Stage
+
+    //MemtoReg 처리 부분
+    public int memToRegSet(ControlSignal controlSignal, int memoryCalcResult, int aluResult) {
+        if (Global.MEM_WBValid) {
+            return mux(controlSignal.memToReg, memoryCalcResult, aluResult);
+        } return 0;
+    }
+
     public void registerWrite(ControlSignal controlSignal, int memToRegResult, int regDstResult) {
 
         if(Global.MEM_WBValid) {
