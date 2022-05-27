@@ -111,12 +111,13 @@ public class Main extends Global {
 
             //Latch
             id_exe.input(decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    registerOutput.aluSrcResult, decodeOutput.regDstResult, decodeOutput.jumpAddr, decodeOutput.branchAddr,
-                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt);
+                    registerOutput.aluSrcResult, decodeOutput.jumpAddr, decodeOutput.branchAddr,
+                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd);
 
+            //RegDst 값 구하기
+            int regDstResult = decodeOutput.regDstSet(id_exe.controlSignal, id_exe.rt, id_exe.rd);
 
             //------------------------------------Data forwarding 처리--------------------------------------
-
 
             AluOutput aluOutput;
 
@@ -177,7 +178,7 @@ public class Main extends Global {
 
             //Latch
             exe_mem.input(id_exe.controlSignal, id_exe.nextPc, id_exe.readData1,
-                    id_exe.readData2, aluOutput.aluCalcResult, id_exe.regDstResult, instEndPoint);
+                    id_exe.readData2, aluOutput.aluCalcResult, regDstResult, instEndPoint);
 
             //-----------------------------------Start MemoryAccess Stage------------------------------------
 

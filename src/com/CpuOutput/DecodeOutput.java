@@ -17,7 +17,6 @@ public class DecodeOutput {
     public int shamt;
     public String func;
     //추가 구현 변수
-    public int regDstResult; //rs, rd 선택
     public int signExt;
     public int zeroExt;
     public int loadUpperImm;
@@ -54,23 +53,24 @@ public class DecodeOutput {
         this.loadUpperImm = loadUpperImm;
         this.jumpAddr = jumpAddr;
         this.branchAddr = branchAddr;
-        set();
     }
 
     //regDst 처리 부분
-    private void set() {
-        if(Global.IF_IDValid) {
+    public int regDstSet(ControlSignal controlSignal, int rt, int rd) {
+
+        int regDstResult;
+        if(Global.ID_EXEValid) {
             regDstResult = mux(controlSignal.regDst, rd, rt);
             regDstResult = mux(controlSignal.jal, 31, regDstResult);
-        }
-
+            return regDstResult;
+        } else return 0;
     }
 
     public void printDecodeStage(String opcode, int rs, int rt) {
 
-        if(Global.IF_IDValid) {
+        if (Global.IF_IDValid) {
             Logger.println("ID Stage -> opcode : %s[%s], rs : R[%d], rt: R[%d]\n", opcode, controlSignal.inst, rs, rt);
-        } else  {
+        } else {
             Logger.println("ID Stage -> [NOP]");
         }
     }
