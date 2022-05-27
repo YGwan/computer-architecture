@@ -13,6 +13,8 @@ public class ID_EXE {
     private int inputJumpAddr;
     private int inputBranchAddr;
     private int inputLoadUpper;
+    private int inputRs;
+    private int inputRt;
 
     public ControlSignal controlSignal;
     public int nextPc;
@@ -23,9 +25,11 @@ public class ID_EXE {
     public int jumpAddr;
     public int branchAddr;
     public int loadUpper;
+    public int rs;
+    public int rt;
 
     public void input(ControlSignal controlSignal, int nextPc, int readData1, int readData2,
-                      int AluSrcResult, int RegDstResult, int jumpAddr, int branchAddr, int loadUpper) {
+                      int AluSrcResult, int RegDstResult, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt) {
         this.inputControlSignal = controlSignal;
         this.inputNextPc = nextPc;
         this.inputReadData1 = readData1;
@@ -35,6 +39,8 @@ public class ID_EXE {
         this.inputJumpAddr = jumpAddr;
         this.inputBranchAddr = branchAddr;
         this.inputLoadUpper = loadUpper;
+        this.inputRs = rs;
+        this.inputRt = rt;
     }
 
     public void output() {
@@ -47,6 +53,8 @@ public class ID_EXE {
         this.jumpAddr = inputJumpAddr;
         this.branchAddr = inputBranchAddr;
         this.loadUpper = inputLoadUpper;
+        this.rs = inputRs;
+        this.rt = inputRt;
     }
 
 

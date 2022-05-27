@@ -22,7 +22,6 @@ public class Main extends Global {
         String path = "source/simple.bin";
 
 
-        
         Logger.println("\n--------------pipeline Start--------------\n");
 
         //Fetch 선언 및 Instruction Fetch
@@ -36,6 +35,7 @@ public class Main extends Global {
         PC pcUpdate = new PC();
         ALU alu = new ALU();
         Memory memory = new Memory();
+        ForwardingUnit forwardingUnit = new ForwardingUnit();
 
         //Latch 선언
         IF_ID if_id = new IF_ID();
@@ -91,29 +91,30 @@ public class Main extends Global {
 
             //Latch
             id_exe.input(decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    registerOutput.aluSrcResult, decodeOutput.regDstResult, decodeOutput.jumpAddr, decodeOutput.branchAddr, decodeOutput.loadUpperImm);
+                    registerOutput.aluSrcResult, decodeOutput.regDstResult, decodeOutput.jumpAddr, decodeOutput.branchAddr,
+                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt);
 
 
             //------------------------------------Data forwarding 처리--------------------------------------
 
+
             AluOutput aluOutput;
 
-            if(onDataForwarding) {
-                DataForwarding dataForwarding = new DataForwarding();
+            if (Logger.onDataForwarding) {
 
+                int signalA = forwardingUnit.forwardA(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
+                        exe_mem.regDstValue, id_exe.rs, mem_wb.regDst);
 
-
-                int signalA = dataForwarding.forwardA(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
-                        exe_mem.regDstValue, decodeOutput.rs, mem_wb.regDst);
-
-                int signalB = dataForwarding.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
-                        exe_mem.regDstValue, decodeOutput.rt, mem_wb.regDst, decodeOutput.rs);
-
+                int signalB = forwardingUnit.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
+                        exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
+//                System.out.println("////////////////////");
+//                System.out.println(signalA);
+//                System.out.println(signalB);
+//                System.out.println("////////////////////");
                 // forwardA･B MUX
-                int aluInputData1 = forwardMux(signalA, id_exe.readData1,exe_mem.aluCalcResult, mem_wb.memToRegResult);
-                int aluInputData2 = forwardMux(signalB, id_exe.aluSrcResult,exe_mem.aluCalcResult, mem_wb.memToRegResult);
+                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluCalcResult, mem_wb.memToRegResult);
+                int aluInputData2 = forwardMux(signalB, id_exe.aluSrcResult, exe_mem.aluCalcResult, mem_wb.memToRegResult);
                 aluOutput = alu.process(aluInputData1, aluInputData2, id_exe.controlSignal);
-
             }
 
             //------------------------------------Start Execution Stage------------------------------------
@@ -122,6 +123,7 @@ public class Main extends Global {
             else {
                 aluOutput = alu.process(id_exe.readData1, id_exe.aluSrcResult, id_exe.controlSignal);
             }
+
 
             aluOutput.acceptLoadUpperImm(id_exe.loadUpper);
             aluOutput.printExecutionOutput();
@@ -187,6 +189,7 @@ public class Main extends Global {
             Global.EXE_MEMValid = Global.InputEXE_MEMValid;
             Global.MEM_WBValid = Global.InputMEM_WBValid;
 
+
             //instEndpoint 값 갱신
 
             instEndPoint = inputInstEndPoint;
@@ -207,13 +210,13 @@ public class Main extends Global {
         int returnValue;
 
         switch (signal) {
-            case 0 :
-                returnValue =  basic;
+            case 0:
+                returnValue = basic;
                 break;
-            case 1 :
+            case 1:
                 returnValue = exe_memReturnVale;
                 break;
-            case 2 :
+            case 2:
                 returnValue = mem_wbReturnValue;
                 break;
 

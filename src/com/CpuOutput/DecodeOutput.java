@@ -69,7 +69,7 @@ public class DecodeOutput {
     public void printDecodeStage(String opcode, int rs, int rt) {
 
         if(Global.IF_IDValid) {
-            Logger.println("ID Stage -> opcode : %s[%s], rs : R[%d], rt: R[%d]\n", opcode, controlSignal.inst, rs, rt );
+            Logger.println("ID Stage -> opcode : %s[%s], rs : R[%d], rt: R[%d]\n", opcode, controlSignal.inst, rs, rt);
         } else  {
             Logger.println("ID Stage -> [NOP]");
         }
