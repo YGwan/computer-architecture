@@ -14,7 +14,7 @@ public class AluOutput {
     ControlSignal controlSignal;
     public int aluCalcResult;
     private int loadUpperImm;
-    private  int aluResult;
+    private int aluResult;
 
     public AluOutput(ControlSignal controlSignal, int aluResult) {
         this.controlSignal = controlSignal;
@@ -33,7 +33,6 @@ public class AluOutput {
     }
 
     public void printExecutionOutput() {
-
 
         if (Global.ID_EXEValid) {
 

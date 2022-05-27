@@ -16,6 +16,7 @@ public class DecodeOutput {
     public int rd;
     public int shamt;
     public String func;
+    public String immediate;
     //추가 구현 변수
     public int signExt;
     public int zeroExt;
@@ -31,6 +32,7 @@ public class DecodeOutput {
             0,
             0,
             null,
+            null,
             0,
             0,
             0,
@@ -39,7 +41,7 @@ public class DecodeOutput {
     );
 
     public DecodeOutput(ControlSignal controlSignal, String opcode, int rs, int rt, int rd,
-                        int shamt, String func, int signExt, int zeroExt, int loadUpperImm, int jumpAddr, int branchAddr) {
+                        int shamt, String func, String immediate, int signExt, int zeroExt, int loadUpperImm, int jumpAddr, int branchAddr) {
 
         this.controlSignal = controlSignal;
         this.opcode = opcode;

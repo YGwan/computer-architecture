@@ -4,14 +4,32 @@ package com.Cpu;
 import com.CpuOutput.AluOutput;
 import com.Memory.Global;
 
+import static com.Main.mux;
+
 public class ALU {
 
 
     int aluResult;
 
+    //ALUSrc, sll 처리 부분
+
+    public int setAluInput1(ControlSignal controlSignal, int shamt, int readData1) {
+        if(Global.ID_EXEValid) {
+            return mux(controlSignal.sll, shamt, readData1);
+        } return 0;
+    }
+
+    public int setAluInput2(ControlSignal controlSignal, int signExt, int zeroExt, int readData2) {
+        if(Global.ID_EXEValid) {
+            int aluInput2 = mux(controlSignal.aluSrc, signExt, readData2);
+            return mux(controlSignal.ori, zeroExt, aluInput2);
+        } return 0;
+    }
+
+
 
     //ALU 기본 연산
-    public AluOutput process(int firstRegisterResult, int aluSrcResult, ControlSignal controlSignal) {
+    public AluOutput process(ControlSignal controlSignal, int firstRegisterResult, int aluSrcResult) {
 
         if (Global.ID_EXEValid) {
 

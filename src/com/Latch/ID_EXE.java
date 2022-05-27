@@ -4,11 +4,13 @@ import com.Cpu.ControlSignal;
 
 public class ID_EXE {
 
-    public ControlSignal inputControlSignal;
-    public int inputNextPc;
+    private ControlSignal inputControlSignal;
+    private int inputNextPc;
     private int inputReadData1;
     private int inputReadData2;
-    private int inputAluSrcResult;
+    private int inputSignExt;
+    private int inputZeroExt;
+    private int inputShamt;
     private int inputJumpAddr;
     private int inputBranchAddr;
     private int inputLoadUpper;
@@ -20,7 +22,9 @@ public class ID_EXE {
     public int nextPc;
     public int readData1;
     public int readData2;
-    public int aluSrcResult;
+    public int signExt;
+    public int zeroExt;
+    public int shamt;
     public int jumpAddr;
     public int branchAddr;
     public int loadUpper;
@@ -28,13 +32,15 @@ public class ID_EXE {
     public int rt;
     public int rd;
 
-    public void input(ControlSignal controlSignal, int nextPc, int readData1, int readData2,
-                      int AluSrcResult, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt, int rd) {
+    public void input(ControlSignal controlSignal, int nextPc, int readData1, int readData2, int signExt, int zeroExt,
+                      int shamt, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt, int rd) {
         this.inputControlSignal = controlSignal;
         this.inputNextPc = nextPc;
         this.inputReadData1 = readData1;
         this.inputReadData2 = readData2;
-        this.inputAluSrcResult = AluSrcResult;
+        this.inputSignExt = signExt;
+        this.inputZeroExt = zeroExt;
+        this.inputShamt = shamt;
         this.inputJumpAddr = jumpAddr;
         this.inputBranchAddr = branchAddr;
         this.inputLoadUpper = loadUpper;
@@ -48,7 +54,9 @@ public class ID_EXE {
         this.nextPc = inputNextPc;
         this.readData1 = inputReadData1;
         this.readData2 = inputReadData2;;
-        this.aluSrcResult = inputAluSrcResult;
+        this.signExt = inputSignExt;
+        this.zeroExt = inputZeroExt;
+        this.shamt = inputShamt;
         this.jumpAddr = inputJumpAddr;
         this.branchAddr = inputBranchAddr;
         this.loadUpper = inputLoadUpper;

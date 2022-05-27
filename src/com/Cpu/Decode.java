@@ -25,6 +25,7 @@ public class Decode {
         int rd = readTobinaryString(binaryInstruction.substring(16, 21));
         int shamt = readTobinaryString(binaryInstruction.substring(21, 26));
         String func = checkOpcodeOrFunc(binaryInstruction.substring(26, 32));
+        String immediate = binaryInstruction.substring(16, 32);
         int signExt = setSignExtImm(binaryInstruction);
         int zeroExt = setZeroExt(binaryInstruction);
         int loadUpperImm = setLoadUpperImm(binaryInstruction);
@@ -46,6 +47,7 @@ public class Decode {
                 rd,
                 shamt,
                 func,
+                immediate,
                 signExt,
                 zeroExt,
                 loadUpperImm,
@@ -65,7 +67,7 @@ public class Decode {
             signExtImmBinaryString.append(firstImmeBit);
         }
         // + immediate
-        signExtImmBinaryString.append(binaryInstruction.substring(16, 32));
+        signExtImmBinaryString.append(binaryInstruction, 16, 32);
 
         // 보수 처리 할지 말지 구현
         if (firstImmeBit == '1') {
@@ -78,17 +80,16 @@ public class Decode {
     //zeroExt 만들기
     //ZeroExtImm = { 16{1b’0}, immediate }
     public int setZeroExt(String binaryInstruction) {
-        StringBuilder zeroExtImmBinaryString = new StringBuilder();
-        zeroExtImmBinaryString.append("0000000000000000");
-        zeroExtImmBinaryString.append(binaryInstruction.substring(16, 32));
-        return readTobinaryString(zeroExtImmBinaryString.toString());
+        String zeroExtImmBinaryString = "0000000000000000" +
+                binaryInstruction.substring(16, 32);
+        return readTobinaryString(zeroExtImmBinaryString);
     }
 
     //Load Upper Imm 만들기
     //{imm, 16’b0}
     public int setLoadUpperImm(String binaryInstruction) {
         StringBuilder loadUpperImmBinaryString = new StringBuilder();
-        loadUpperImmBinaryString.append(binaryInstruction.substring(16, 32));
+        loadUpperImmBinaryString.append(binaryInstruction, 16, 32);
         loadUpperImmBinaryString.append("0000000000000000");
 
         char firstImmeBit = binaryInstruction.charAt(16);

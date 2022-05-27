@@ -98,20 +98,12 @@ public class Main extends Global {
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.controlSignal);
 
-            //ALUSrc를 위해 signExt ,zeroExt, shamt보내기
-            registerOutput.acceptSignExt(decodeOutput.signExt);
-            registerOutput.acceptZeroExt(decodeOutput.zeroExt);
-            registerOutput.acceptShamt(decodeOutput.shamt);
-
-            //ALUSrc Mux
-            registerOutput.set();
-
 
             //------------------------------------Finish Decode Stage--------------------------------------
 
             //Latch
             id_exe.input(decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    registerOutput.aluSrcResult, decodeOutput.jumpAddr, decodeOutput.branchAddr,
+                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
                     decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd);
 
             //RegDst 값 구하기
@@ -132,7 +124,7 @@ public class Main extends Global {
 
                 // forwardA･B MUX
                 int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluCalcResult, mem_wb.memToRegResult);
-                int aluInputData2 = forwardMux(signalB, id_exe.aluSrcResult, exe_mem.aluCalcResult, mem_wb.memToRegResult);
+                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluCalcResult, mem_wb.memToRegResult);
 
 //                System.out.println("////////////////");
 //                System.out.println(aluInputData1);
@@ -144,17 +136,22 @@ public class Main extends Global {
 //                System.out.println(signalB);
 //                System.out.println("~~~~~~~~~~~~~");
 
+                int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, aluInputData1);
+                int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, aluInputData2);
 
-                aluOutput = alu.process(aluInputData1, aluInputData2, id_exe.controlSignal);
+                aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
             }
 
             //------------------------------------Start Execution Stage------------------------------------
 
             //Execution
             else {
-                aluOutput = alu.process(id_exe.readData1, id_exe.aluSrcResult, id_exe.controlSignal);
+                int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, id_exe.readData1);
+                int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, id_exe.readData2);
+                aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
             }
 
+            
 
             aluOutput.acceptLoadUpperImm(id_exe.loadUpper);
             aluOutput.printExecutionOutput();
