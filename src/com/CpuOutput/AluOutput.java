@@ -14,7 +14,7 @@ public class AluOutput {
     ControlSignal controlSignal;
     public int aluCalcResult;
     private int loadUpperImm;
-    private final int aluResult;
+    private  int aluResult;
 
     public AluOutput(ControlSignal controlSignal, int aluResult) {
         this.controlSignal = controlSignal;

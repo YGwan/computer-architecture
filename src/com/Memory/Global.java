@@ -22,6 +22,20 @@ public class Global {
     public static boolean InputEXE_MEMValid = false;
     public static boolean InputMEM_WBValid = false;
 
+    public static void init() {
+        pc =0;
+        nextPC =0;
 
+        FetchValid = true;
+        IF_IDValid = false;
+        ID_EXEValid = false;
+        EXE_MEMValid = false;
+        MEM_WBValid = false;
+
+        InputIF_IDValid = false;
+        InputID_EXEValid = false;
+        InputEXE_MEMValid = false;
+        InputMEM_WBValid = false;
+    }
 
 }

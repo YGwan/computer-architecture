@@ -13,16 +13,33 @@ import java.io.IOException;
 public class Main extends Global {
 
     public static void main(String[] args) throws IOException {
-
         Logger.LOGGING_SIGNAL = true;
         Logger.LOGGING_COUNTER_SIGNAL = true;
 
+        test("source/simple.bin", 0);
+//        test("source/simple2.bin", 100);
+//        test("source/simple3.bin", 5050);
+//        test("source/simple4.bin", 55);
+//        test("source/gcd.bin", 1);
+//        test("source/fib.bin", 55);
+//        test("source/input4.bin", 85);
+    }
+
+    private static void test(String path, int expect) throws IOException {
+        int result = process(path);
+        if(result != expect) {
+            System.out.println("failed -> Path : " + path + " expected : " + expect + " real : " + result);
+        }
+        System.out.println("succeed -> Path : " + path + " expected : " + expect + " real : " + result);
+    }
+
+
+    private static int process(String path) throws IOException {
         initializedRegister();
+        Global.init();
 
-        String path = "source/simple.bin";
-
-
-        Logger.println("\n--------------pipeline Start--------------\n");
+        Logger.println("\n--------------pipeline Start--------------");
+        Logger.println("--------------" + path + " --------------\n");
 
         //Fetch 선언 및 Instruction Fetch
         MemoryFetch memoryFetch = new MemoryFetch(path);
@@ -86,6 +103,9 @@ public class Main extends Global {
             registerOutput.acceptZeroExt(decodeOutput.zeroExt);
             registerOutput.acceptShamt(decodeOutput.shamt);
 
+            //ALUSrc Mux
+            registerOutput.set();
+
 
             //------------------------------------Finish Decode Stage--------------------------------------
 
@@ -107,13 +127,23 @@ public class Main extends Global {
 
                 int signalB = forwardingUnit.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
                         exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
-//                System.out.println("////////////////////");
-//                System.out.println(signalA);
-//                System.out.println(signalB);
-//                System.out.println("////////////////////");
+
+
                 // forwardA･B MUX
                 int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluCalcResult, mem_wb.memToRegResult);
                 int aluInputData2 = forwardMux(signalB, id_exe.aluSrcResult, exe_mem.aluCalcResult, mem_wb.memToRegResult);
+
+//                System.out.println("////////////////");
+//                System.out.println(aluInputData1);
+//                System.out.println(aluInputData2);
+//                System.out.println("////////////////");
+//
+//                System.out.println("~~~~~~~~~~~~~");
+//                System.out.println(signalA);
+//                System.out.println(signalB);
+//                System.out.println("~~~~~~~~~~~~~");
+
+
                 aluOutput = alu.process(aluInputData1, aluInputData2, id_exe.controlSignal);
             }
 
@@ -196,6 +226,7 @@ public class Main extends Global {
         }
 
         System.out.printf("\nresult value R[2] : %d\n", Global.register[2]);
+        return Global.register[2];
     }
 
     public static int mux(boolean signal, int trueVal, int falseVal) {

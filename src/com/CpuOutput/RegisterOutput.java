@@ -39,12 +39,11 @@ public class RegisterOutput {
     //shamt 처리 부분
     public void acceptShamt(int shamt) {
         this.shamt = shamt;
-        set();
     }
 
 
     //ALUSrc, sll 처리 부분
-    private void set() {
+    public void set() {
 
         if(Global.IF_IDValid) {
             aluSrcResult = mux(controlSignal.aluSrc, signExt, secondRegisterOutput);

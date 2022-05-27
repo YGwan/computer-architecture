@@ -17,6 +17,7 @@ public class ForwardingUnit {
         }
 
         if (MEM_WBValid) {
+
             if ((memWbControlSignal.regWrite) && (memWbRD != 0) && (memWbRD == idExeRS)) {
                 if ((exeMemRD != idExeRS) || (!exeMemControlSignal.regWrite)) {
                     returnValue = 2;
@@ -39,6 +40,7 @@ public class ForwardingUnit {
         }
 
         if (MEM_WBValid) {
+
             if (memWbControlSignal.regWrite && (memWbRD != 0) && (memWbRD == idExeRT)) {
                 if ((exeMemRD != idExeRS) || (!exeMemControlSignal.regWrite)) {
                     returnValue = 2;
