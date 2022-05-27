@@ -4,10 +4,20 @@ import com.CpuOutput.MemoryOutput;
 import com.Logger;
 import com.Memory.Global;
 
+import static com.Main.mux;
+
 public class Memory {
 
     private final int memesize = 0x4000000;
     public int[] dataMemory = new int[memesize];
+
+    //address 값 설정하기
+
+    public int setAddress(ControlSignal controlSignal, int loadUpperImm, int aluResult) {
+            if(Global.EXE_MEMValid) {
+                return mux(controlSignal.lui, loadUpperImm, aluResult);
+            } else  return 0;
+    }
 
     //MemRead
     public MemoryOutput read(int address, ControlSignal controlSignal, boolean instEndPoint) {

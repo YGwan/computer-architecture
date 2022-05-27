@@ -123,8 +123,8 @@ public class Main extends Global {
 
 
                 // forwardA･B MUX
-                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluCalcResult, mem_wb.memToRegResult);
-                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluCalcResult, mem_wb.memToRegResult);
+                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, mem_wb.memToRegResult);
+                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, mem_wb.memToRegResult);
 
 //                System.out.println("////////////////");
 //                System.out.println(aluInputData1);
@@ -151,14 +151,13 @@ public class Main extends Global {
                 aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
             }
 
-            
-
-            aluOutput.acceptLoadUpperImm(id_exe.loadUpper);
-            aluOutput.printExecutionOutput();
 
 
-            //pc Update
-            pcUpdate.pcUpdate(id_exe.controlSignal, id_exe.readData1, aluOutput.aluCalcResult, id_exe.jumpAddr, id_exe.branchAddr);
+            aluOutput.printExecutionOutput(aluOutput.aluResult);
+
+
+            //pc Update - 문제가 발생할 수도 있다.
+            pcUpdate.pcUpdate(id_exe.controlSignal, id_exe.readData1, aluOutput.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
 
 
             //-----------------------------------pc == -1 일때 처리 -----------------------------------------
@@ -175,19 +174,24 @@ public class Main extends Global {
 
             //Latch
             exe_mem.input(id_exe.controlSignal, id_exe.nextPc, id_exe.readData1,
-                    id_exe.readData2, aluOutput.aluCalcResult, regDstResult, instEndPoint);
+                    id_exe.readData2, aluOutput.aluResult, regDstResult, instEndPoint);
+
+
 
             //-----------------------------------Start MemoryAccess Stage------------------------------------
 
-            //Memory Access
-            MemoryOutput memoryOutput = memory.read(exe_mem.aluCalcResult, exe_mem.controlSignal, exe_mem.instEndPoint);
+            //loadUpper값 구분 Mux(LUI)
+            int finalAluResult = memory.setAddress(exe_mem.controlSignal, id_exe.loadUpper, exe_mem.aluResult);
 
-            memory.write(exe_mem.aluCalcResult, exe_mem.rtValue, exe_mem.controlSignal, exe_mem.instEndPoint);
+            //Memory Access
+            MemoryOutput memoryOutput = memory.read(exe_mem.aluResult, exe_mem.controlSignal, exe_mem.instEndPoint);
+
+            memory.write(exe_mem.aluResult, exe_mem.rtValue, exe_mem.controlSignal, exe_mem.instEndPoint);
 
 
             //MemToReg 위한 값 보내기
-            memoryOutput.acceptAluResult(exe_mem.aluCalcResult, exe_mem.instEndPoint);
-            memory.printExecutionMemoryAccess(exe_mem.controlSignal, exe_mem.aluCalcResult, exe_mem.rtValue, exe_mem.instEndPoint);
+            memoryOutput.acceptAluResult(exe_mem.aluResult, exe_mem.instEndPoint);
+            memory.printExecutionMemoryAccess(exe_mem.controlSignal, exe_mem.aluResult, exe_mem.rtValue, exe_mem.instEndPoint);
 
 
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
