@@ -72,6 +72,17 @@ public class Main extends Global {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
+            //--------------------------------------Start WriteBack Stage------------------------------------
+
+            //MemToReg 값 구분 MUX
+            int memToRegValue = register.memToRegSet(mem_wb.controlSignal, mem_wb.memoryCalcResult, mem_wb.finalAluResult);
+            //writeBack
+            register.registerWrite(mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
+
+            System.out.println("memTORegValue : "+ memToRegValue);
+
+            //--------------------------------------Finish WriteBack Stage------------------------------------
+
             //-----------------------------------Start MemoryAccess Stage------------------------------------
 
             //loadUpper값 구분 Mux(LUI)
@@ -87,14 +98,6 @@ public class Main extends Global {
 
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
 
-            //--------------------------------------Start WriteBack Stage------------------------------------
-
-            //MemToReg 값 구분 MUX
-            int memToRegValue = register.memToRegSet(mem_wb.controlSignal, mem_wb.memoryCalcResult, mem_wb.finalAluResult);
-            //writeBack
-            register.registerWrite(mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
-
-            //--------------------------------------Finish WriteBack Stage------------------------------------
 
             //-----------------------------------------Start Fetch Stage--------------------------------------
 
@@ -122,7 +125,7 @@ public class Main extends Global {
             int readData2;
 
 //            //lw일때의 decode dataforwarding
-//            if(Logger.onDataForwarding) {
+//            if (Logger.onDataForwarding) {
 //                boolean signalA = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
 //                        exe_mem.regDstValue, decodeOutput.rs);
 //                boolean signalB = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
@@ -152,6 +155,8 @@ public class Main extends Global {
             AluOutput aluOutput;
 
             if (Logger.onDataForwarding) {
+                System.out.println("has hazard!!!!" );
+                System.out.println();
 
                 int signalA = forwardingUnit.forwardA(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
                         exe_mem.regDstValue, id_exe.rs, mem_wb.regDst);
@@ -159,23 +164,35 @@ public class Main extends Global {
                 int signalB = forwardingUnit.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
                         exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
 
+                System.out.println(signalA);
+                System.out.println(signalB);
+
+
 
                 // forwardA･B MUX
-                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, mem_wb.finalAluResult);
-                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, mem_wb.finalAluResult);
-
-//                System.out.println("////////////////");
-//                System.out.println(aluInputData1);
-//                System.out.println(aluInputData2);
-//                System.out.println("////////////////");
-//
-//                System.out.println("~~~~~~~~~~~~~");
-//                System.out.println(signalA);
-//                System.out.println(signalB);
-//                System.out.println("~~~~~~~~~~~~~");
+                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, memToRegValue);
+                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, memToRegValue);
 
                 int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, aluInputData1);
                 int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, aluInputData2);
+
+                System.out.println("///////r2");
+                System.out.println(" signalA: " + signalA);
+                System.out.println(" signalB: " + signalB);
+                System.out.println(" aluInputData1: " + aluInputData1);
+                System.out.println(" aluInputData2: " + aluInputData2);
+                if(id_exe.controlSignal != null) {
+                    System.out.println(" id_exe.controlSignal: " + id_exe.controlSignal.inst);
+                }
+                System.out.println(" aluInput1: " + aluInput1);
+                System.out.println(" aluInput2: " + aluInput2);
+                System.out.println(" exe_mem.aluResult : " + exe_mem.aluResult);
+                System.out.println(" memToRegValue : " + memToRegValue);
+                System.out.println(id_exe.rs + " " + aluInput1);
+                System.out.println(id_exe.rt + " " + aluInput2);
+                System.out.println("//////////");
+
+                System.out.println(aluInput1 + " " + aluInput2);
 
                 aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
             }
