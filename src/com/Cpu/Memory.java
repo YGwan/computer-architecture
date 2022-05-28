@@ -26,7 +26,6 @@ public class Memory {
             return new MemoryOutput(null, 0);
         } else {
             if (Global.EXE_MEMValid) {
-
                 if (controlSignal.memRead) {
                     Global.InputMEM_WBValid = true;
                     return new MemoryOutput(controlSignal, dataMemory[address]);

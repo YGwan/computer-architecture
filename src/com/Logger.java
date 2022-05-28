@@ -5,7 +5,6 @@ public class Logger {
 
     public static boolean LOGGING_SIGNAL = true;
     public static boolean LOGGING_COUNTER_SIGNAL = true;
-    public static boolean onDataForwarding = true;
 
     public static void println() {
         if (!LOGGING_SIGNAL) return;

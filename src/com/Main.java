@@ -27,7 +27,7 @@ public class Main extends Global {
 
     private static void test(String path, int expect) throws IOException {
         int result = process(path);
-        if(result != expect) {
+        if (result != expect) {
             System.out.println("failed -> Path : " + path + " expected : " + expect + " real : " + result);
         }
         System.out.println("succeed -> Path : " + path + " expected : " + expect + " real : " + result);
@@ -79,8 +79,6 @@ public class Main extends Global {
             //writeBack
             register.registerWrite(mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
 
-            System.out.println("memTORegValue : "+ memToRegValue);
-
             //--------------------------------------Finish WriteBack Stage------------------------------------
 
             //-----------------------------------Start MemoryAccess Stage------------------------------------
@@ -92,8 +90,6 @@ public class Main extends Global {
             MemoryOutput memoryOutput = memory.read(exe_mem.aluResult, exe_mem.controlSignal, exe_mem.instEndPoint);
 
             memory.write(exe_mem.aluResult, exe_mem.rtValue, exe_mem.controlSignal, exe_mem.instEndPoint);
-
-
 
 
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
@@ -120,25 +116,8 @@ public class Main extends Global {
             RegisterOutput registerOutput = register.registerCalc(decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.controlSignal);
 
-
-            int readData1;
-            int readData2;
-
-//            //lw일때의 decode dataforwarding
-//            if (Logger.onDataForwarding) {
-//                boolean signalA = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
-//                        exe_mem.regDstValue, decodeOutput.rs);
-//                boolean signalB = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
-//                        exe_mem.regDstValue, decodeOutput.rt);
-//                readData1 = mux(signalA, memoryOutput.memoryCalcResult, registerOutput.firstRegisterOutput);
-//                readData2 = mux(signalB, memoryOutput.memoryCalcResult, registerOutput.secondRegisterOutput);
-//            } else {
-//                readData1 = registerOutput.firstRegisterOutput;
-//                readData2 = registerOutput.secondRegisterOutput;
-//            }
-
-            readData1 = registerOutput.firstRegisterOutput;
-            readData2 = registerOutput.secondRegisterOutput;
+            int readData1 = registerOutput.firstRegisterOutput;
+            int readData2 = registerOutput.secondRegisterOutput;
 
             //------------------------------------Finish Decode Stage--------------------------------------
 
@@ -152,59 +131,24 @@ public class Main extends Global {
 
             //------------------------------------Data forwarding 처리--------------------------------------
 
-            AluOutput aluOutput;
 
-            if (Logger.onDataForwarding) {
-                System.out.println("has hazard!!!!" );
-                System.out.println();
+            //Execution
+            int signalA = forwardingUnit.forwardA(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
+                    exe_mem.regDstValue, id_exe.rs, mem_wb.regDst);
 
-                int signalA = forwardingUnit.forwardA(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
-                        exe_mem.regDstValue, id_exe.rs, mem_wb.regDst);
+            int signalB = forwardingUnit.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
+                    exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
 
-                int signalB = forwardingUnit.forwardB(EXE_MEMValid, MEM_WBValid, exe_mem.controlSignal, mem_wb.controlSignal,
-                        exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
-
-                System.out.println(signalA);
-                System.out.println(signalB);
-
-
-
-                // forwardA･B MUX
-                int aluInputData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, memToRegValue);
-                int aluInputData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, memToRegValue);
-
-                int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, aluInputData1);
-                int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, aluInputData2);
-
-                System.out.println("///////r2");
-                System.out.println(" signalA: " + signalA);
-                System.out.println(" signalB: " + signalB);
-                System.out.println(" aluInputData1: " + aluInputData1);
-                System.out.println(" aluInputData2: " + aluInputData2);
-                if(id_exe.controlSignal != null) {
-                    System.out.println(" id_exe.controlSignal: " + id_exe.controlSignal.inst);
-                }
-                System.out.println(" aluInput1: " + aluInput1);
-                System.out.println(" aluInput2: " + aluInput2);
-                System.out.println(" exe_mem.aluResult : " + exe_mem.aluResult);
-                System.out.println(" memToRegValue : " + memToRegValue);
-                System.out.println(id_exe.rs + " " + aluInput1);
-                System.out.println(id_exe.rt + " " + aluInput2);
-                System.out.println("//////////");
-
-                System.out.println(aluInput1 + " " + aluInput2);
-
-                aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
-            }
+            // forwardA･B MUX
+            id_exe.readData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, memToRegValue);
+            id_exe.readData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, memToRegValue);
+            exe_mem.rtValue = id_exe.readData2;
+            int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, id_exe.readData1);
+            int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, id_exe.readData2);
 
             //------------------------------------Start Execution Stage------------------------------------
 
-            //Execution
-            else {
-                int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, id_exe.readData1);
-                int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, id_exe.readData2);
-                aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
-            }
+            AluOutput aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
 
             //pc Update - 문제가 발생할 수도 있다.
             pcUpdate.pcUpdate(id_exe.controlSignal, id_exe.readData1, aluOutput.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
@@ -223,8 +167,8 @@ public class Main extends Global {
             //------------------------------------Finish Execution Stage------------------------------------
 
             //Latch
-            exe_mem.input(id_exe.controlSignal, id_exe.nextPc, id_exe.readData1,
-                    id_exe.readData2, aluOutput.aluResult, regDstResult, instEndPoint);
+            exe_mem.input(id_exe.controlSignal, id_exe.nextPc, id_exe.readData2,
+                    aluOutput.aluResult, regDstResult, instEndPoint);
 
             //Latch
             mem_wb.input(exe_mem.controlSignal, finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
@@ -249,7 +193,6 @@ public class Main extends Global {
             Global.ID_EXEValid = Global.InputID_EXEValid;
             Global.EXE_MEMValid = Global.InputEXE_MEMValid;
             Global.MEM_WBValid = Global.InputMEM_WBValid;
-
 
             //instEndpoint 값 갱신
 

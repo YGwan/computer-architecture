@@ -41,6 +41,8 @@ public class ForwardingUnit {
         return returnValue;
     }
 
+
+
     public int forwardB(boolean EXE_MEMValid, boolean MEM_WBValid, ControlSignal exeMemControlSignal, ControlSignal memWbControlSignal,
                         int exeMemRD, int idExeRT, int memWbRD, int idExeRS) {
 
