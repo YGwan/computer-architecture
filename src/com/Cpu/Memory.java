@@ -60,10 +60,10 @@ public class Memory {
             if (Global.EXE_MEMValid) {
                 String index = Integer.toHexString(address);
                 if (controlSignal.memRead) {
-                    Logger.println("MA Stage -> M[0x%s] = %d\n", index, dataMemory[address]);
+                    Logger.println("MA Stage -> M[0x%s] = %d , (0x%s = %s) <LW>\n", index ,dataMemory[address], index ,address);
 
                 } else if (controlSignal.memWrite) {
-                    Logger.println("MA Stage -> M[0x%s] = %d\n", index, writeData);
+                    Logger.println("MA Stage -> M[0x%s] = %d , (0x%s = %s) <SW>\n", index ,writeData, index ,address);
                 } else {
                     Logger.println("MA Stage -> ");
                 }

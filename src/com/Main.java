@@ -16,9 +16,9 @@ public class Main extends Global {
         Logger.LOGGING_SIGNAL = true;
         Logger.LOGGING_COUNTER_SIGNAL = true;
 
-        test("source/simple.bin", 0);
+//        test("source/simple.bin", 0);
         test("source/simple2.bin", 100);
-        test("source/simple3.bin", 5050);
+//        test("source/simple3.bin", 5050);
 //        test("source/simple4.bin", 55);
 //        test("source/gcd.bin", 1);
 //        test("source/fib.bin", 55);
@@ -121,17 +121,21 @@ public class Main extends Global {
             int readData1;
             int readData2;
 
-            if(Logger.onDataForwarding) {
-                boolean signalA = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
-                        exe_mem.regDstValue, decodeOutput.rs);
-                boolean signalB = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
-                        exe_mem.regDstValue, decodeOutput.rt);
-                readData1 = mux(signalA, memoryOutput.memoryCalcResult, registerOutput.firstRegisterOutput);
-                readData2 = mux(signalB, memoryOutput.memoryCalcResult, registerOutput.secondRegisterOutput);
-            } else {
-                readData1 = registerOutput.firstRegisterOutput;
-                readData2 = registerOutput.secondRegisterOutput;
-            }
+//            //lw일때의 decode dataforwarding
+//            if(Logger.onDataForwarding) {
+//                boolean signalA = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
+//                        exe_mem.regDstValue, decodeOutput.rs);
+//                boolean signalB = forwardingUnit.forwardDecodeInputValue(EXE_MEMValid, exe_mem.controlSignal,
+//                        exe_mem.regDstValue, decodeOutput.rt);
+//                readData1 = mux(signalA, memoryOutput.memoryCalcResult, registerOutput.firstRegisterOutput);
+//                readData2 = mux(signalB, memoryOutput.memoryCalcResult, registerOutput.secondRegisterOutput);
+//            } else {
+//                readData1 = registerOutput.firstRegisterOutput;
+//                readData2 = registerOutput.secondRegisterOutput;
+//            }
+
+            readData1 = registerOutput.firstRegisterOutput;
+            readData2 = registerOutput.secondRegisterOutput;
 
             //------------------------------------Finish Decode Stage--------------------------------------
 
