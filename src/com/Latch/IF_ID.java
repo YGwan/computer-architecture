@@ -1,6 +1,8 @@
 package com.Latch;
 
 
+import com.Memory.Global;
+
 public class IF_ID {
 
 
@@ -24,4 +26,9 @@ public class IF_ID {
         this.instruction = inputInstruction;
         this.hexInstruction = inputHexInstruction;
     }
+
+//    public void flush() {
+//
+//        Global.
+//    }
 }

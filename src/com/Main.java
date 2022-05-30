@@ -9,6 +9,7 @@ import com.Latch.MEM_WB;
 import com.Memory.Global;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class Main extends Global {
 
@@ -17,8 +18,8 @@ public class Main extends Global {
         Logger.LOGGING_COUNTER_SIGNAL = true;
 
 //        test("source/simple.bin", 0);
-        test("source/simple2.bin", 100);
-//        test("source/simple3.bin", 5050);
+//        test("source/simple2.bin", 100);
+        test("source/simple3.bin", 5050);
 //        test("source/simple4.bin", 55);
 //        test("source/gcd.bin", 1);
 //        test("source/fib.bin", 55);
@@ -67,12 +68,13 @@ public class Main extends Global {
 
         while (!mem_wb.instEndPoint) {
 
+
             //total cycle 수 측정
             if (cycleCount % 1000000 == 0) {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
-            //--------------------------------------Start WriteBack Stage------------------------------------
+            //Todo : --------------------------------------Start WriteBack Stage------------------------------------
 
             //MemToReg 값 구분 MUX
             int memToRegValue = register.memToRegSet(mem_wb.controlSignal, mem_wb.memoryCalcResult, mem_wb.finalAluResult);
@@ -81,7 +83,7 @@ public class Main extends Global {
 
             //--------------------------------------Finish WriteBack Stage------------------------------------
 
-            //-----------------------------------Start MemoryAccess Stage------------------------------------
+            //Todo : -----------------------------------Start MemoryAccess Stage------------------------------------
 
             //loadUpper값 구분 Mux(LUI)
             int finalAluResult = memory.setAddress(exe_mem.controlSignal, id_exe.loadUpper, exe_mem.aluResult);
@@ -95,12 +97,24 @@ public class Main extends Global {
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
 
 
-            //-----------------------------------------Start Fetch Stage--------------------------------------
+            //Todo : -----------------------------------------Start Fetch Stage--------------------------------------
 
             // instruction fetch
-            MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(pc);
-            String pcHex = Integer.toHexString(pc * 4);
-            pc = nextPC;
+
+
+            //Todo: pc가 -1로 갈때, IndexOutOfBoundsException 생기는 것을 방지하기 위해서 씀
+            MemoryFetchOutput memoryFetchOutput = null;
+            String pcHex = null;
+            try {
+                memoryFetchOutput = memoryFetch.fetch(pc);
+                pcHex = Integer.toHexString(pc * 4);
+                pc = nextPC;
+
+            } catch (IndexOutOfBoundsException ignored) {
+                memoryFetchOutput = memoryFetch.fetch(pc-1);
+                pcHex = Integer.toHexString(pc * 4);
+            }
+
 
             //------------------------------------Finish Fetch Stage------------------------------------
 
@@ -108,7 +122,7 @@ public class Main extends Global {
             if_id.input(memoryFetchOutput.nextPC, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
 
 
-            //------------------------------------Start Decode Stage------------------------------------
+            //Todo : ------------------------------------Start Decode Stage------------------------------------
 
             // instruction decode
             DecodeOutput decodeOutput = decode.decodeInstruction(if_id.instruction);
@@ -121,6 +135,24 @@ public class Main extends Global {
 
             //------------------------------------Finish Decode Stage--------------------------------------
 
+            //Todo: jump, branch, jal, jr일때 fetch 한단계 막기.
+//
+//            if(Global.IF_IDValid) {
+//                System.out.println(decodeOutput.controlSignal.inst);
+//                if (Objects.equals(decodeOutput.controlSignal.inst, "JUMP")) {
+//                    System.out.println("이건 들어오면 안돼~");
+//                    Global.FetchValid = false;
+//                    Global.InputIF_IDValid = false;
+//                } else {
+//                    Global.FetchValid = true;
+//                    Global.InputIF_IDValid = true;
+//                }
+//            }
+
+            //Todo : ------------------------------------pc update 처리--------------------------------------
+            pcUpdate.pcUpdate(id_exe.controlSignal, id_exe.readData1, exe_mem.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
+
+
             //Latch
             id_exe.input(decodeOutput.controlSignal, if_id.nextPC, readData1, readData2,
                     decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
@@ -129,7 +161,7 @@ public class Main extends Global {
             //RegDst 값 구하기
             int regDstResult = decodeOutput.regDstSet(id_exe.controlSignal, id_exe.rt, id_exe.rd);
 
-            //------------------------------------Data forwarding 처리--------------------------------------
+            //Todo : ------------------------------------Data forwarding 처리--------------------------------------
 
 
             //Execution
@@ -146,15 +178,12 @@ public class Main extends Global {
             int aluInput1 = alu.setAluInput1(id_exe.controlSignal, id_exe.shamt, id_exe.readData1);
             int aluInput2 = alu.setAluInput2(id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, id_exe.readData2);
 
-            //------------------------------------Start Execution Stage------------------------------------
+            //Todo : ------------------------------------Start Execution Stage------------------------------------
 
             AluOutput aluOutput = alu.process(id_exe.controlSignal, aluInput1, aluInput2);
 
-            //pc Update - 문제가 발생할 수도 있다.
-            pcUpdate.pcUpdate(id_exe.controlSignal, id_exe.readData1, aluOutput.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
 
-
-            //-----------------------------------pc == -1 일때 처리 -----------------------------------------
+            //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------
 
             if (pc == -1) {
                 Global.FetchValid = false;
@@ -173,14 +202,8 @@ public class Main extends Global {
             //Latch
             mem_wb.input(exe_mem.controlSignal, finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
 
-            //출력 부분
-            if (FetchValid) {
-                Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount++, pcHex, if_id.inputHexInstruction);
-            } else {
-                Logger.println("cyl %d, IF Stage -> [NOP]\n", cycleCount++);
-            }
+            cycleCount = printLogo(register, pcUpdate, memory, if_id, exe_mem, mem_wb, cycleCount, pcHex, decodeOutput, aluOutput);
 
-            printLogo(register, pcUpdate, memory, exe_mem, mem_wb, decodeOutput, aluOutput);
 
             //latch Update
             if_id.output();
@@ -195,7 +218,6 @@ public class Main extends Global {
             Global.MEM_WBValid = Global.InputMEM_WBValid;
 
             //instEndpoint 값 갱신
-
             instEndPoint = inputInstEndPoint;
         }
 
@@ -203,13 +225,21 @@ public class Main extends Global {
         return Global.register[2];
     }
 
-    private static void printLogo(Register register, PC pcUpdate, Memory memory, EXE_MEM exe_mem, MEM_WB mem_wb, DecodeOutput decodeOutput, AluOutput aluOutput) {
+    private static int printLogo(Register register, PC pcUpdate, Memory memory, IF_ID if_id, EXE_MEM exe_mem, MEM_WB mem_wb, int cycleCount, String pcHex, DecodeOutput decodeOutput, AluOutput aluOutput) {
+        //출력 부분
+        if (FetchValid) {
+            Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount++, pcHex, if_id.inputHexInstruction);
+        } else {
+            Logger.println("cyl %d, IF Stage -> [NOP]\n", cycleCount++);
+        }
+
         decodeOutput.printDecodeStage(decodeOutput.opcode, decodeOutput.rs, decodeOutput.rt);
         aluOutput.printExecutionOutput(aluOutput.aluResult);
         pcUpdate.pcUpdatePrint();
         memory.printExecutionMemoryAccess(exe_mem.controlSignal, exe_mem.aluResult, exe_mem.rtValue, exe_mem.instEndPoint);
         register.printExecutionWriteBack(mem_wb.controlSignal, mem_wb.regDst);
         Logger.println();
+        return cycleCount;
     }
 
     public static int mux(boolean signal, int trueVal, int falseVal) {

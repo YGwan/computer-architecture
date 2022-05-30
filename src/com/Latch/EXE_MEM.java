@@ -36,4 +36,5 @@ public class EXE_MEM {
         this.regDstValue = inputRegDstValue;
         this.instEndPoint = inputInstEndPoint;
     }
+
 }
