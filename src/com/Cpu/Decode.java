@@ -12,9 +12,9 @@ import static com.Memory.Global.pc;
 public class Decode {
 
 
-    public DecodeOutput decodeInstruction(String binaryInstruction) {
+    public DecodeOutput decodeInstruction(boolean IF_IDValid, String binaryInstruction) {
 
-        if (!Global.IF_IDValid) {
+        if (!IF_IDValid) {
             return DecodeOutput.NONE;
         }
 
@@ -35,9 +35,6 @@ public class Decode {
 
         int jumpAddr = jumpAddr(binaryInstruction);
         int branchAddr = branchAddr(binaryInstruction);
-
-        //InputID_EXEValid true로 만들기
-        Global.InputID_EXEValid = true;
 
         return new DecodeOutput(
                 controlSignal,

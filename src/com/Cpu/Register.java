@@ -16,10 +16,9 @@ public class Register {
     private int writeData;
 
 
-    public RegisterOutput registerCalc(int rs, int rt, ControlSignal controlSignal) {
+    public RegisterOutput registerCalc(boolean IF_IDValid,int rs, int rt, ControlSignal controlSignal) {
 
-
-        if(Global.IF_IDValid) {
+        if(IF_IDValid) {
             return new RegisterOutput(
                     controlSignal,
                     Global.register[rs],
@@ -37,15 +36,15 @@ public class Register {
     //WriteBack Stage
 
     //MemtoReg 처리 부분
-    public int memToRegSet(ControlSignal controlSignal, int memoryCalcResult, int aluResult) {
-        if (Global.MEM_WBValid) {
+    public int memToRegSet(boolean MEM_WBValid,ControlSignal controlSignal, int memoryCalcResult, int aluResult) {
+        if (MEM_WBValid) {
             return mux(controlSignal.memToReg, memoryCalcResult, aluResult);
         } return 0;
     }
 
-    public void registerWrite(ControlSignal controlSignal, int memToRegResult, int regDstResult) {
+    public void registerWrite(boolean MEM_WBValid, ControlSignal controlSignal, int memToRegResult, int regDstResult) {
 
-        if(Global.MEM_WBValid) {
+        if(MEM_WBValid) {
             this.writeData = mux(controlSignal.jal, Global.pc + 2, memToRegResult);
             if (controlSignal.regWrite) {
                 Global.register[regDstResult] = writeData;
@@ -53,9 +52,9 @@ public class Register {
         }
     }
 
-    public void printExecutionWriteBack(ControlSignal controlSignal, int regDstResult) {
+    public void printExecutionWriteBack(boolean MEM_WBValid,ControlSignal controlSignal, int regDstResult) {
 
-        if (Global.MEM_WBValid) {
+        if (MEM_WBValid) {
 
             if (controlSignal.regWrite) {
                 if (controlSignal.jal) {

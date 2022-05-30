@@ -14,9 +14,9 @@ public class AluOutput {
         this.aluResult = aluResult;
     }
 
-    public void printExecutionOutput(int aluResult) {
+    public void printExecutionOutput(boolean ID_EXEValid,int aluResult) {
 
-        if (Global.ID_EXEValid) {
+        if (ID_EXEValid) {
             Logger.println("EX Stage -> result : %d, ", aluResult);
         } else {
             Logger.println("EX Stage -> [NOP]");

@@ -4,6 +4,7 @@ import com.Cpu.ControlSignal;
 
 public class ID_EXE {
 
+    public boolean inputValid;
     private ControlSignal inputControlSignal;
     private int inputNextPc;
     private int inputReadData1;
@@ -18,6 +19,7 @@ public class ID_EXE {
     private int inputRt;
     private int inputRd;
 
+    public boolean valid;
     public ControlSignal controlSignal;
     public int nextPc;
     public int readData1;
@@ -32,8 +34,9 @@ public class ID_EXE {
     public int rt;
     public int rd;
 
-    public void input(ControlSignal controlSignal, int nextPc, int readData1, int readData2, int signExt, int zeroExt,
+    public void input(boolean valid, ControlSignal controlSignal, int nextPc, int readData1, int readData2, int signExt, int zeroExt,
                       int shamt, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt, int rd) {
+        this.inputValid = valid;
         this.inputControlSignal = controlSignal;
         this.inputNextPc = nextPc;
         this.inputReadData1 = readData1;
@@ -50,6 +53,7 @@ public class ID_EXE {
     }
 
     public void output() {
+        this.valid = inputValid;
         this.controlSignal = inputControlSignal;
         this.nextPc = inputNextPc;
         this.readData1 = inputReadData1;

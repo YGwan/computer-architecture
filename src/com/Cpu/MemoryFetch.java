@@ -61,10 +61,9 @@ public class MemoryFetch {
 
 
 
-    public MemoryFetchOutput fetch(int pc) {
+    public MemoryFetchOutput fetch(boolean fetchValid,int pc) {
 
-        if(Global.FetchValid) {
-            Global.InputIF_IDValid = true;
+        if(fetchValid) {
             return new MemoryFetchOutput(
                     binaryInstructions.get(pc),
                     hexInstructions.get(pc),
@@ -78,6 +77,8 @@ public class MemoryFetch {
             );
         }
     }
+
+
 
     public String printHexInst(int pc) {
         return hexInstructions.get(pc);

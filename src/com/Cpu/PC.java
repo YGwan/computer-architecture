@@ -1,9 +1,6 @@
 package com.Cpu;
 
 import com.Logger;
-import com.Memory.Global;
-
-import java.lang.management.GarbageCollectorMXBean;
 
 import static com.Main.mux;
 import static com.Memory.Global.pc;
@@ -13,9 +10,10 @@ public class PC {
     private String pcHex;
 
     //pc 설정 부분
-    public void pcUpdate(ControlSignal controlSignal, int rsValue, int aluResult, int jumpAddr, int branchAddr) {
+    public void pcUpdate(boolean ID_EXEValid, ControlSignal controlSignal, int rsValue, int aluResult, int jumpAddr, int branchAddr) {
 
-        if(Global.ID_EXEValid) {
+        if (ID_EXEValid) {
+
             pc = mux(controlSignal.jr, rsValue, pc);
             pc = mux(controlSignal.jump, jumpAddr / 4, pc);
             pc = mux(bneBeqProcess(aluResult, controlSignal), ((pc * 4 + branchAddr) / 4), pc);
@@ -26,11 +24,12 @@ public class PC {
             } else {
                 pcHex = Integer.toHexString(pc * 4);
             }
+
         }
     }
 
-    public void pcUpdatePrint() {
-        if(Global.ID_EXEValid) {
+    public void pcUpdatePrint(boolean ID_EXEValid) {
+        if (ID_EXEValid) {
             Logger.println("Next  PC -> 0x" + pcHex);
         }
     }

@@ -58,19 +58,19 @@ public class DecodeOutput {
     }
 
     //regDst 처리 부분
-    public int regDstSet(ControlSignal controlSignal, int rt, int rd) {
+    public int regDstSet(boolean ID_EXEValid,ControlSignal controlSignal, int rt, int rd) {
 
         int regDstResult;
-        if(Global.ID_EXEValid) {
+        if(ID_EXEValid) {
             regDstResult = mux(controlSignal.regDst, rd, rt);
             regDstResult = mux(controlSignal.jal, 31, regDstResult);
             return regDstResult;
         } else return 0;
     }
 
-    public void printDecodeStage(String opcode, int rs, int rt) {
+    public void printDecodeStage(boolean IF_IDValid,String opcode, int rs, int rt) {
 
-        if (Global.IF_IDValid) {
+        if (IF_IDValid) {
             Logger.println("ID Stage -> opcode : %s[%s], rs : R[%d], rt: R[%d]\n", opcode, controlSignal.inst, rs, rt);
         } else {
             Logger.println("ID Stage -> [NOP]");
