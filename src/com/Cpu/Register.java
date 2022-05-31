@@ -13,7 +13,7 @@ import static com.Main.mux;
 public class Register {
 
 
-    private int writeData;
+    public int writeData;
 
 
     public RegisterOutput registerCalc(boolean IF_IDValid,int rs, int rt, ControlSignal controlSignal) {
@@ -42,17 +42,19 @@ public class Register {
         } return 0;
     }
 
-    public void registerWrite(boolean MEM_WBValid, ControlSignal controlSignal, int memToRegResult, int regDstResult) {
+    public void registerWrite(int nextPC, boolean MEM_WBValid, ControlSignal controlSignal,
+                              int memToRegResult, int regDstResult) {
 
         if(MEM_WBValid) {
-            this.writeData = mux(controlSignal.jal, Global.pc + 2, memToRegResult);
+            System.out.println(nextPC);
+            this.writeData = mux(controlSignal.jal, nextPC + 2, memToRegResult);
             if (controlSignal.regWrite) {
                 Global.register[regDstResult] = writeData;
             }
         }
     }
 
-    public void printExecutionWriteBack(boolean MEM_WBValid,ControlSignal controlSignal, int regDstResult) {
+    public void printExecutionWriteBack(boolean MEM_WBValid, ControlSignal controlSignal, int regDstResult, int writeData) {
 
         if (MEM_WBValid) {
 

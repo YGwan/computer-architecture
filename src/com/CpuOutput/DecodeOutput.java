@@ -68,12 +68,4 @@ public class DecodeOutput {
         } else return 0;
     }
 
-    public void printDecodeStage(boolean IF_IDValid,String opcode, int rs, int rt) {
-
-        if (IF_IDValid) {
-            Logger.println("ID Stage -> opcode : %s[%s], rs : R[%d], rt: R[%d]\n", opcode, controlSignal.inst, rs, rt);
-        } else {
-            Logger.println("ID Stage -> [NOP]");
-        }
-    }
 }

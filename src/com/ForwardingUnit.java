@@ -27,7 +27,6 @@ public class ForwardingUnit {
     public int forwardB(boolean EXE_MEMValid, boolean MEM_WBValid, ControlSignal exeMemControlSignal, ControlSignal memWbControlSignal,
                         int exeMemRD, int idExeRT, int memWbRD, int idExeRS) {
 
-
         if (EXE_MEMValid) {
             if (exeMemControlSignal.regWrite && (exeMemRD != 0) && (exeMemRD == idExeRT)) {
                 return 1;

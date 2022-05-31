@@ -144,7 +144,6 @@ public class ControlSignal {
             case "02": {
                 inst = "JUMP";
                 jump = true;
-                regWrite = true;
             }
             break;
             case "03": {

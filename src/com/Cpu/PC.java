@@ -10,13 +10,13 @@ public class PC {
     private String pcHex;
 
     //pc 설정 부분
-    public void pcUpdate(boolean ID_EXEValid, ControlSignal controlSignal, int rsValue, int aluResult, int jumpAddr, int branchAddr) {
+    public void pcUpdate(boolean ID_EXEValid, ControlSignal controlSignal, int nextPC, int rsValue, int aluResult, int jumpAddr, int branchAddr) {
 
         if (ID_EXEValid) {
 
             pc = mux(controlSignal.jr, rsValue, pc);
             pc = mux(controlSignal.jump, jumpAddr / 4, pc);
-            pc = mux(bneBeqProcess(aluResult, controlSignal), ((pc * 4 + branchAddr) / 4), pc);
+            pc = mux(bneBeqProcess(aluResult, controlSignal), ((nextPC * 4 + branchAddr) / 4), pc);
             pc = mux(controlSignal.jal, jumpAddr / 4, pc);
 
             if (pc == -1) {

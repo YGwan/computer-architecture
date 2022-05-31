@@ -74,18 +74,22 @@ public class Main extends Global {
 
         while (!mem_wb.instEndPoint) {
 
-
             //total cycle 수 측정
             if (cycleCount % 1000000 == 0) {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
+            if(cycleCount > 100) {
+                Logger.LOGGING_SIGNAL = false;
+                Logger.LOGGING_COUNTER_SIGNAL = false;
+            }
             //Todo : --------------------------------------Start WriteBack Stage------------------------------------
 
             //MemToReg 값 구분 MUX
             int memToRegValue = register.memToRegSet(mem_wb.valid, mem_wb.controlSignal, mem_wb.memoryCalcResult, mem_wb.finalAluResult);
+
             //writeBack
-            register.registerWrite(mem_wb.valid, mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
+            register.registerWrite(mem_wb.nextPc, mem_wb.valid, mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
 
             //--------------------------------------Finish WriteBack Stage------------------------------------
 
@@ -127,7 +131,7 @@ public class Main extends Global {
             //------------------------------------Finish Fetch Stage------------------------------------
 
             //Latch
-            if_id.input(fetchValid, memoryFetchOutput.nextPC, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
+            if_id.input(fetchValid, pc-1, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
 
 
             //Todo : ------------------------------------Start Decode Stage------------------------------------
@@ -144,14 +148,14 @@ public class Main extends Global {
             //Todo: jump, jal, bne,beq일때 fetchvaild false 만들기
 
             if (if_id.valid) {
-                if(Objects.equals(decodeOutput.controlSignal.inst, "JUMP") ||
-                        Objects.equals(decodeOutput.controlSignal.inst, "JAL") ||
-                        Objects.equals(decodeOutput.controlSignal.inst, "BNE") ){
+                if (Objects.equals(decodeOutput.controlSignal.inst, "JUMP") ||
+                        Objects.equals(decodeOutput.controlSignal.inst, "JAL")) {
                     fetchValid = false;
                 } else {
                     fetchValid = true;
                 }
             }
+
 
             //Latch
             id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
@@ -174,7 +178,8 @@ public class Main extends Global {
             // forwardA･B MUX
             id_exe.readData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, memToRegValue);
             id_exe.readData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, memToRegValue);
-            exe_mem.rtValue = id_exe.readData2;
+            exe_mem.inputRtValue = id_exe.readData2;
+
             int aluInput1 = alu.setAluInput1(id_exe.valid, id_exe.controlSignal, id_exe.shamt, id_exe.readData1);
             int aluInput2 = alu.setAluInput2(id_exe.valid, id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, id_exe.readData2);
 
@@ -189,8 +194,15 @@ public class Main extends Global {
             exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData2,
                     aluOutput.aluResult, regDstResult, instEndPoint);
 
+            if(if_id.valid) {
+                if(Objects.equals(decodeOutput.controlSignal.inst, "BNE")) {
+                    if(aluOutput.aluResult == 1) {
+                        fetchValid = false;
+                    }
+                }
+            }
             //Todo : ------------------------------------pc update 처리--------------------------------------
-            pcUpdate.pcUpdate(id_exe.valid, id_exe.controlSignal, id_exe.readData1, exe_mem.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
+            pcUpdate.pcUpdate(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData1, exe_mem.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
 
 
             //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------
@@ -201,17 +213,17 @@ public class Main extends Global {
             }
 
             //Latch
-            mem_wb.input(exe_mem.valid, exe_mem.controlSignal, finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
+            mem_wb.input(exe_mem.valid, exe_mem.nextPc, exe_mem.controlSignal, finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
 
 
             //Logo 출력
-            memoryFetchOutput.printFetchStage(fetchValid,cycleCount,pcHex,if_id.inputHexInstruction);
+            memoryFetchOutput.printFetchStage(fetchValid, cycleCount, pcHex, if_id.inputHexInstruction);
             cycleCount++;
-            decodeOutput.printDecodeStage(if_id.valid, decodeOutput.opcode, decodeOutput.rs, decodeOutput.rt);
+            registerOutput.printDecodeStage(if_id.valid, decodeOutput.opcode, decodeOutput.rs, decodeOutput.rt, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput);
             aluOutput.printExecutionOutput(id_exe.valid, aluOutput.aluResult);
             pcUpdate.pcUpdatePrint(id_exe.valid);
             memory.printExecutionMemoryAccess(exe_mem.valid, exe_mem.controlSignal, exe_mem.aluResult, exe_mem.rtValue, exe_mem.instEndPoint);
-            register.printExecutionWriteBack(mem_wb.valid, mem_wb.controlSignal, mem_wb.regDst);
+            register.printExecutionWriteBack(mem_wb.valid, mem_wb.controlSignal, mem_wb.regDst, register.writeData);
             Logger.println();
 
 
@@ -220,10 +232,6 @@ public class Main extends Global {
             id_exe.output();
             exe_mem.output();
             mem_wb.output();
-
-
-
-
         }
 
         System.out.printf("\nresult value R[2] : %d\n", Global.register[2]);

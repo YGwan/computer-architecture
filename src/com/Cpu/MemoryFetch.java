@@ -61,7 +61,7 @@ public class MemoryFetch {
 
 
 
-    public MemoryFetchOutput fetch(boolean fetchValid,int pc) {
+    public MemoryFetchOutput fetch(boolean fetchValid, int pc) {
 
         if(fetchValid) {
             return new MemoryFetchOutput(
@@ -73,7 +73,7 @@ public class MemoryFetch {
             return new MemoryFetchOutput(
                     null,
                     null,
-                    pc + 1
+                    pc+1
             );
         }
     }

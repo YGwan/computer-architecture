@@ -8,7 +8,7 @@ public class EXE_MEM {
     private ControlSignal inputControlSignal;
     private int inputNextPc;
     public int inputAluResult;
-    private int inputRtValue;
+    public int inputRtValue;
     private int inputRegDstValue;
     private boolean inputInstEndPoint;
 
