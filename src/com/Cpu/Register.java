@@ -46,7 +46,6 @@ public class Register {
                               int memToRegResult, int regDstResult) {
 
         if(MEM_WBValid) {
-            System.out.println(nextPC);
             this.writeData = mux(controlSignal.jal, nextPC + 2, memToRegResult);
             if (controlSignal.regWrite) {
                 Global.register[regDstResult] = writeData;

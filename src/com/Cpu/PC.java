@@ -1,5 +1,6 @@
 package com.Cpu;
 
+import com.Latch.IF_ID;
 import com.Logger;
 
 import static com.Main.mux;
@@ -9,11 +10,11 @@ public class PC {
 
     private String pcHex;
 
+    //
     //pc 설정 부분
     public void pcUpdate(boolean ID_EXEValid, ControlSignal controlSignal, int nextPC, int rsValue, int aluResult, int jumpAddr, int branchAddr) {
 
         if (ID_EXEValid) {
-
             pc = mux(controlSignal.jr, rsValue, pc);
             pc = mux(controlSignal.jump, jumpAddr / 4, pc);
             pc = mux(bneBeqProcess(aluResult, controlSignal), ((nextPC * 4 + branchAddr) / 4), pc);
