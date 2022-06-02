@@ -5,6 +5,16 @@ public class Logger {
 
     public static boolean LOGGING_SIGNAL = true;
     public static boolean LOGGING_COUNTER_SIGNAL = true;
+    public static int min = 0;
+    public static int max = 0;
+
+    public static void setPrintRange(int cycle) {
+        if(min < cycle && cycle < max) {
+            LOGGING_SIGNAL = true;
+        } else {
+            LOGGING_SIGNAL = false;
+        }
+    }
 
     public static void println() {
         if (!LOGGING_SIGNAL) return;

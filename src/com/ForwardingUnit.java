@@ -5,7 +5,7 @@ import com.Cpu.ControlSignal;
 public class ForwardingUnit {
 
 
-    public int forwardA(boolean EXE_MEMValid, boolean MEM_WBValid, ControlSignal exeMemControlSignal, ControlSignal memWbControlSignal,
+    public int forwardA(boolean EXE_MEMValid, boolean MEM_WBValid ,ControlSignal exeMemControlSignal, ControlSignal memWbControlSignal,
                         int exeMemRD, int idExeRS, int memWbRD) {
 
         if (EXE_MEMValid) {
@@ -34,9 +34,8 @@ public class ForwardingUnit {
         }
 
         if (MEM_WBValid) {
-
             if (memWbControlSignal.regWrite && (memWbRD != 0) && (memWbRD == idExeRT)) {
-                if ((exeMemRD != idExeRS) || (!exeMemControlSignal.regWrite)) {
+                if ((exeMemRD != idExeRT) || (!exeMemControlSignal.regWrite)) {
                    return 2;
                 }
             }

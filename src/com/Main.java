@@ -14,16 +14,19 @@ import java.util.Objects;
 public class Main extends Global {
 
     public static void main(String[] args) throws IOException {
-        Logger.LOGGING_SIGNAL = true;
-        Logger.LOGGING_COUNTER_SIGNAL = true;
+        Logger.LOGGING_SIGNAL = false;
+        Logger.LOGGING_COUNTER_SIGNAL = false;
+
+        Logger.min = 29828539;
+        Logger.max = 29831539;
 
 //        test("source/simple.bin", 0);
 //        test("source/simple2.bin", 100);
 //        test("source/simple3.bin", 5050);
-        test("source/simple4.bin", 55);
-        test("source/gcd.bin", 1);
+//        test("source/simple4.bin", 55);
+//        test("source/gcd.bin", 1);
 //        test("source/fib.bin", 55);
-//        test("source/input4.bin", 85);
+        test("source/input4.bin", 85);
     }
 
     private static void test(String path, int expect) throws IOException {
@@ -80,8 +83,10 @@ public class Main extends Global {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
+            Logger.setPrintRange(cycleCount);
+
 //            //Todo: --------------------------------------control cycle count------------------------------------
-//            if(cycleCount > 1000) {
+//            if(cycleCount > 16390) {
 //                Logger.LOGGING_SIGNAL = false;
 //                Logger.LOGGING_COUNTER_SIGNAL = false;
 //            }
@@ -98,13 +103,11 @@ public class Main extends Global {
 
             //Todo : -----------------------------------Start MemoryAccess Stage------------------------------------
 
-            //loadUpper값 구분 Mux(LUI)
-            int finalAluResult = memory.setAddress(exe_mem.valid, exe_mem.controlSignal, id_exe.loadUpper, exe_mem.aluResult);
-
             //Memory Access
-            MemoryOutput memoryOutput = memory.read(exe_mem.valid, exe_mem.aluResult, exe_mem.controlSignal, exe_mem.instEndPoint);
+            MemoryOutput memoryOutput = memory.read(exe_mem.valid, exe_mem.finalAluResult, exe_mem.controlSignal, exe_mem.instEndPoint);
 
-            memory.write(exe_mem.valid, exe_mem.aluResult, exe_mem.rtValue, exe_mem.controlSignal, exe_mem.instEndPoint);
+            memory.write(exe_mem.valid, exe_mem.finalAluResult, exe_mem.rtValue, exe_mem.controlSignal, exe_mem.instEndPoint);
+
 
 
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
@@ -148,18 +151,20 @@ public class Main extends Global {
             //Todo: jump, jal, bne,beq일때 fetchvaild false 만들기
 
             if (if_id.valid) {
-                if (Objects.equals(decodeOutput.controlSignal.inst, "JUMP") ||
-                        Objects.equals(decodeOutput.controlSignal.inst, "JAL")) {
-                    fetchValid = false;
-                } else {
-                    fetchValid = true;
-                }
+                fetchValid = !Objects.equals(decodeOutput.controlSignal.inst, "JUMP") &&
+                        !Objects.equals(decodeOutput.controlSignal.inst, "JAL");
             }
 
             //Todo: ------------------------------------JAL / JUMP pc update--------------------------------------
 
 
             //Todo : ------------------------------------Data forwarding 처리--------------------------------------
+
+
+            //Latch
+            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
+                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
+                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, instEndPoint);
 
 
             //Execution
@@ -170,16 +175,9 @@ public class Main extends Global {
                     exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
 
             // forwardA･B MUX
-            id_exe.readData1 = forwardMux(signalA, id_exe.readData1, exe_mem.aluResult, memToRegValue);
-            id_exe.readData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, memToRegValue);
+            id_exe.readData1 = forwardMux(signalA, id_exe.readData1, exe_mem.finalAluResult, memToRegValue);
+            id_exe.readData2 = forwardMux(signalB, id_exe.readData2, exe_mem.finalAluResult, memToRegValue);
             exe_mem.inputRtValue = id_exe.readData2;
-
-            //Latch
-            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
-                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, instEndPoint);
-
-
 
             //---------------------------------------------Finish Decode Stage--------------------------------------
 
@@ -212,29 +210,36 @@ public class Main extends Global {
             //Todo : ------------------------------------pc update 처리--------------------------------------
             pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, aluOutput.aluResult, id_exe.branchAddr);
 
+            //loadUpper값 구분 Mux(LUI)
+            int finalAluResult = memory.setAddress(id_exe.valid, id_exe.controlSignal, id_exe.loadUpper, aluOutput.aluResult);
+
             //Latch
             exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData2,
-                    aluOutput.aluResult, regDstResult, id_exe.instEndPoint);
+                    finalAluResult, regDstResult, id_exe.instEndPoint);
 
             if(if_id.valid) {
                 if(Objects.equals(decodeOutput.controlSignal.inst, "BNE")) {
                     if(aluOutput.aluResult == 1) {
                         fetchValid = false;
                     }
+                } else if(Objects.equals(decodeOutput.controlSignal.inst, "BEQ")) {
+                    if(aluOutput.aluResult == 0) {
+                        fetchValid = false;
+                    }
                 }
             }
 
             //Latch
-            mem_wb.input(exe_mem.valid, exe_mem.nextPc, exe_mem.controlSignal, finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
-
+            mem_wb.input(exe_mem.valid, exe_mem.nextPc, exe_mem.controlSignal,
+                    exe_mem.finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
 
             //Logo 출력
             memoryFetchOutput.printFetchStage(fetchValid, cycleCount, pcHex, if_id.inputHexInstruction);
             cycleCount++;
             registerOutput.printDecodeStage(if_id.valid, decodeOutput.opcode, decodeOutput.rs, decodeOutput.rt, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput);
-            aluOutput.printExecutionOutput(id_exe.valid, aluOutput.aluResult);
+            aluOutput.printExecutionOutput(id_exe.valid, finalAluResult);
             pcUpdate.pcUpdatePrint(id_exe.valid);
-            memory.printExecutionMemoryAccess(exe_mem.valid, exe_mem.controlSignal, exe_mem.aluResult, exe_mem.rtValue, exe_mem.instEndPoint);
+            memory.printExecutionMemoryAccess(exe_mem.valid, exe_mem.controlSignal, exe_mem.finalAluResult, exe_mem.rtValue, exe_mem.instEndPoint);
             register.printExecutionWriteBack(mem_wb.valid, mem_wb.controlSignal, mem_wb.regDst, register.writeData);
             Logger.println();
 
@@ -255,7 +260,7 @@ public class Main extends Global {
                 "MA Stage -> [NOP]\n" +
                 "WB Stage -> [NOP]\n", cycleCount);
 
-        System.out.println("-------------------------- Finish Program --------------------------");
+        System.out.println("\n\n-------------------------- Finish Program --------------------------");
         System.out.println("total count is " + cycleCount);
         System.out.printf("result value R[2] : %d\n", Global.register[2]);
         return Global.register[2];

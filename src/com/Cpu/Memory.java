@@ -15,8 +15,8 @@ public class Memory {
 
     //address 값 설정하기
 
-    public int setAddress(boolean EXE_MEMValid,ControlSignal controlSignal, int loadUpperImm, int aluResult) {
-            if(EXE_MEMValid) {
+    public int setAddress(boolean ID_EXEValid, ControlSignal controlSignal, int loadUpperImm, int aluResult) {
+            if(ID_EXEValid) {
                 return mux(controlSignal.lui, loadUpperImm, aluResult);
             } else  return 0;
     }
@@ -47,7 +47,6 @@ public class Memory {
                     dataMemory[address] = writedata;
                 }
             }
-
         }
     }
 
