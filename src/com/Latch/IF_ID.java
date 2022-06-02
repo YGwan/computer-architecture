@@ -5,7 +5,7 @@ import com.Memory.Global;
 
 public class IF_ID {
 
-    private boolean inputValid;
+    public boolean inputValid;
     private int inputNextPc;
     private String inputInstruction;
     public String inputHexInstruction;

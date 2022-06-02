@@ -19,9 +19,9 @@ public class Main extends Global {
 
 //        test("source/simple.bin", 0);
 //        test("source/simple2.bin", 100);
-        test("source/simple3.bin", 5050);
-//        test("source/simple4.bin", 55);
-//        test("source/gcd.bin", 1);
+//        test("source/simple3.bin", 5050);
+        test("source/simple4.bin", 55);
+        test("source/gcd.bin", 1);
 //        test("source/fib.bin", 55);
 //        test("source/input4.bin", 85);
     }
@@ -64,6 +64,7 @@ public class Main extends Global {
         int cycleCount = 1;
 
         boolean instEndPoint = false;
+        boolean inputInstEndPoint = false;
 
         //valid 변수 초기화
         boolean fetchValid = true;
@@ -79,10 +80,12 @@ public class Main extends Global {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
-            if(cycleCount > 100) {
-                Logger.LOGGING_SIGNAL = false;
-                Logger.LOGGING_COUNTER_SIGNAL = false;
-            }
+//            //Todo: --------------------------------------control cycle count------------------------------------
+//            if(cycleCount > 1000) {
+//                Logger.LOGGING_SIGNAL = false;
+//                Logger.LOGGING_COUNTER_SIGNAL = false;
+//            }
+
             //Todo : --------------------------------------Start WriteBack Stage------------------------------------
 
             //MemToReg 값 구분 MUX
@@ -111,10 +114,10 @@ public class Main extends Global {
 
             // instruction fetch
 
-
-            //Todo: pc가 -1로 갈때, IndexOutOfBoundsException 생기는 것을 방지하기 위해서 씀
-            MemoryFetchOutput memoryFetchOutput = null;
-            String pcHex = null;
+            MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
+            String pcHex = Integer.toHexString(pc * 4);
+/*
+            pc가 -1로 갈때, IndexOutOfBoundsException 생기는 것을 방지하기 위해서 씀
             try {
                 memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
                 pcHex = Integer.toHexString(pc * 4);
@@ -126,12 +129,12 @@ public class Main extends Global {
                     pcHex = Integer.toHexString(pc * 4);
                 }
             }
-
+*/
 
             //------------------------------------Finish Fetch Stage------------------------------------
 
             //Latch
-            if_id.input(fetchValid, pc-1, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
+            if_id.input(fetchValid, pc, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
 
 
             //Todo : ------------------------------------Start Decode Stage------------------------------------
@@ -141,9 +144,6 @@ public class Main extends Global {
 
             RegisterOutput registerOutput = register.registerCalc(if_id.valid, decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.controlSignal);
-
-
-            //------------------------------------Finish Decode Stage--------------------------------------
 
             //Todo: jump, jal, bne,beq일때 fetchvaild false 만들기
 
@@ -156,14 +156,8 @@ public class Main extends Global {
                 }
             }
 
+            //Todo: ------------------------------------JAL / JUMP pc update--------------------------------------
 
-            //Latch
-            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
-                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd);
-
-            //RegDst 값 구하기
-            int regDstResult = decodeOutput.regDstSet(id_exe.valid, id_exe.controlSignal, id_exe.rt, id_exe.rd);
 
             //Todo : ------------------------------------Data forwarding 처리--------------------------------------
 
@@ -180,19 +174,47 @@ public class Main extends Global {
             id_exe.readData2 = forwardMux(signalB, id_exe.readData2, exe_mem.aluResult, memToRegValue);
             exe_mem.inputRtValue = id_exe.readData2;
 
+            //Latch
+            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
+                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
+                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, instEndPoint);
+
+
+
+            //---------------------------------------------Finish Decode Stage--------------------------------------
+
+            //Todo: ------------------------------------------JAL / JUMP /JR pc update------------------------------------------
+            pcUpdate.pcJumpJalJrUpdate(if_id.valid, memoryFetchOutput.nextPC, decodeOutput.controlSignal,
+                    id_exe.inputReadData1, decodeOutput.jumpAddr);
+
+            //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------
+
+            if (pc == -1) {
+                fetchValid = false;
+                if_id.inputValid = false;
+                inputInstEndPoint = true;
+            }
+
+            //Todo : ------------------------------------Start Execution Stage--------------------------------------
+
+            //RegDst 값 구하기
+            int regDstResult = decodeOutput.regDstSet(id_exe.valid, id_exe.controlSignal, id_exe.rt, id_exe.rd);
+
             int aluInput1 = alu.setAluInput1(id_exe.valid, id_exe.controlSignal, id_exe.shamt, id_exe.readData1);
             int aluInput2 = alu.setAluInput2(id_exe.valid, id_exe.controlSignal, id_exe.signExt, id_exe.zeroExt, id_exe.readData2);
-
-            //Todo : ------------------------------------Start Execution Stage------------------------------------
 
             AluOutput aluOutput = alu.process(id_exe.valid, id_exe.controlSignal, aluInput1, aluInput2);
 
 
             //------------------------------------Finish Execution Stage------------------------------------
 
+
+            //Todo : ------------------------------------pc update 처리--------------------------------------
+            pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, aluOutput.aluResult, id_exe.branchAddr);
+
             //Latch
             exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData2,
-                    aluOutput.aluResult, regDstResult, instEndPoint);
+                    aluOutput.aluResult, regDstResult, id_exe.instEndPoint);
 
             if(if_id.valid) {
                 if(Objects.equals(decodeOutput.controlSignal.inst, "BNE")) {
@@ -200,16 +222,6 @@ public class Main extends Global {
                         fetchValid = false;
                     }
                 }
-            }
-            //Todo : ------------------------------------pc update 처리--------------------------------------
-            pcUpdate.pcUpdate(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData1, exe_mem.aluResult, id_exe.jumpAddr, id_exe.branchAddr);
-
-
-            //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------
-
-            if (pc == -1) {
-                fetchValid = false;
-                instEndPoint = true;
             }
 
             //Latch
@@ -232,9 +244,20 @@ public class Main extends Global {
             id_exe.output();
             exe_mem.output();
             mem_wb.output();
+
+            //EndPoint Update
+            instEndPoint = inputInstEndPoint;
         }
 
-        System.out.printf("\nresult value R[2] : %d\n", Global.register[2]);
+        System.out.printf("cyl %d, IF Stage -> [NOP]\n" +
+                "ID Stage -> [NOP]\n" +
+                "EX Stage -> [NOP]\n" +
+                "MA Stage -> [NOP]\n" +
+                "WB Stage -> [NOP]\n", cycleCount);
+
+        System.out.println("-------------------------- Finish Program --------------------------");
+        System.out.println("total count is " + cycleCount);
+        System.out.printf("result value R[2] : %d\n", Global.register[2]);
         return Global.register[2];
     }
 

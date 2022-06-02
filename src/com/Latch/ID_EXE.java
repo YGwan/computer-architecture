@@ -6,8 +6,8 @@ public class ID_EXE {
 
     public boolean inputValid;
     private ControlSignal inputControlSignal;
-    private int inputNextPc;
-    private int inputReadData1;
+    public int inputNextPc;
+    public int inputReadData1;
     private int inputReadData2;
     private int inputSignExt;
     private int inputZeroExt;
@@ -18,6 +18,7 @@ public class ID_EXE {
     private int inputRs;
     private int inputRt;
     private int inputRd;
+    private boolean inputInstEndPoint;
 
     public boolean valid;
     public ControlSignal controlSignal;
@@ -33,9 +34,10 @@ public class ID_EXE {
     public int rs;
     public int rt;
     public int rd;
+    public boolean instEndPoint;
 
     public void input(boolean valid, ControlSignal controlSignal, int nextPc, int readData1, int readData2, int signExt, int zeroExt,
-                      int shamt, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt, int rd) {
+                      int shamt, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt, int rd, boolean instEndPoint) {
         this.inputValid = valid;
         this.inputControlSignal = controlSignal;
         this.inputNextPc = nextPc;
@@ -50,6 +52,7 @@ public class ID_EXE {
         this.inputRs = rs;
         this.inputRt = rt;
         this.inputRd = rd;
+        this.inputInstEndPoint = instEndPoint;
     }
 
     public void output() {
@@ -67,6 +70,7 @@ public class ID_EXE {
         this.rs = inputRs;
         this.rt = inputRt;
         this.rd = inputRd;
+        this.instEndPoint = inputInstEndPoint;
     }
 
 

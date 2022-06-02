@@ -73,7 +73,7 @@ public class MemoryFetch {
             return new MemoryFetchOutput(
                     null,
                     null,
-                    pc+1
+                    pc
             );
         }
     }

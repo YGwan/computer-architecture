@@ -13,11 +13,10 @@ public class MemoryFetchOutput {
         this.instruction = instruction;
         this.hexInstruction = hexInstruction;
         this.nextPC = nextPC;
-        Global.nextPC = nextPC;
     }
 
     public void printFetchStage(boolean fetchValid, int cycleCount, String pcHex, String instruction) {
-        if (fetchValid || instruction != null) {
+        if (fetchValid && instruction != null) {
             Logger.println("cyl %d, IF Stage -> pc : 0x%s, instruction : 0x%s\n", cycleCount, pcHex, instruction);
         } else {
             Logger.println("cyl %d, IF Stage -> [NOP]\n", cycleCount);

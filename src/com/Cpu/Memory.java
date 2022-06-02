@@ -4,11 +4,13 @@ import com.CpuOutput.MemoryOutput;
 import com.Logger;
 import com.Memory.Global;
 
+import java.util.Locale;
+
 import static com.Main.mux;
 
 public class Memory {
 
-    private final int memesize = 0x4000000;
+    private final int memesize = 0x1000000;
     public int[] dataMemory = new int[memesize];
 
     //address 값 설정하기
@@ -55,7 +57,8 @@ public class Memory {
             Logger.println("MA Stage -> [NOP]");
         } else {
             if (EXE_MEMValid) {
-                String index = Integer.toHexString(address);
+                String index = Integer.toHexString(address).toUpperCase();
+
                 if (controlSignal.memRead) {
                     Logger.println("MA Stage -> M[0x%s] = %d , (0x%s = %s) <LW>\n", index ,dataMemory[address], index ,address);
 
