@@ -17,16 +17,16 @@ public class Main extends Global {
         Logger.LOGGING_SIGNAL = false;
         Logger.LOGGING_COUNTER_SIGNAL = false;
 
-        Logger.min = 29828539;
-        Logger.max = 29831539;
+        Logger.min = 29820000;
+        Logger.max = -1;
 
-//        test("source/simple.bin", 0);
-//        test("source/simple2.bin", 100);
-//        test("source/simple3.bin", 5050);
-//        test("source/simple4.bin", 55);
-//        test("source/gcd.bin", 1);
-//        test("source/fib.bin", 55);
-        test("source/input4.bin", 85);
+        test("source/simple.bin", 0);
+        test("source/simple2.bin", 100);
+        test("source/simple3.bin", 5050);
+        test("source/simple4.bin", 55);
+        test("source/gcd.bin", 1);
+        test("source/fib.bin", 55);
+//        test("source/input4.bin", 85);
     }
 
     private static void test(String path, int expect) throws IOException {
@@ -83,7 +83,7 @@ public class Main extends Global {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
-            Logger.setPrintRange(cycleCount);
+//            Logger.setPrintRange(cycleCount);
 
 //            //Todo: --------------------------------------control cycle count------------------------------------
 //            if(cycleCount > 16390) {
@@ -151,8 +151,7 @@ public class Main extends Global {
             //Todo: jump, jal, bne,beq일때 fetchvaild false 만들기
 
             if (if_id.valid) {
-                fetchValid = !Objects.equals(decodeOutput.controlSignal.inst, "JUMP") &&
-                        !Objects.equals(decodeOutput.controlSignal.inst, "JAL");
+                fetchValid = true;
             }
 
             //Todo: ------------------------------------JAL / JUMP pc update--------------------------------------
@@ -160,24 +159,21 @@ public class Main extends Global {
 
             //Todo : ------------------------------------Data forwarding 처리--------------------------------------
 
-
             //Latch
             id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPC, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
                     decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
                     decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, instEndPoint);
 
-
             //Execution
-            int signalA = forwardingUnit.forwardA(exe_mem.valid, mem_wb.valid, exe_mem.controlSignal, mem_wb.controlSignal,
+            int signalA = forwardingUnit.forward(exe_mem.valid, mem_wb.valid, exe_mem.controlSignal, mem_wb.controlSignal,
                     exe_mem.regDstValue, id_exe.rs, mem_wb.regDst);
 
-            int signalB = forwardingUnit.forwardB(exe_mem.valid, mem_wb.valid, exe_mem.controlSignal, mem_wb.controlSignal,
-                    exe_mem.regDstValue, id_exe.rt, mem_wb.regDst, id_exe.rs);
+            int signalB = forwardingUnit.forward(exe_mem.valid, mem_wb.valid, exe_mem.controlSignal, mem_wb.controlSignal,
+                    exe_mem.regDstValue, id_exe.rt, mem_wb.regDst);
 
             // forwardA･B MUX
             id_exe.readData1 = forwardMux(signalA, id_exe.readData1, exe_mem.finalAluResult, memToRegValue);
             id_exe.readData2 = forwardMux(signalB, id_exe.readData2, exe_mem.finalAluResult, memToRegValue);
-            exe_mem.inputRtValue = id_exe.readData2;
 
             //---------------------------------------------Finish Decode Stage--------------------------------------
 

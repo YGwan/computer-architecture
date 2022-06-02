@@ -29,9 +29,4 @@ public class IF_ID {
         this.instruction = inputInstruction;
         this.hexInstruction = inputHexInstruction;
     }
-
-//    public void flush() {
-//
-//        Global.
-//    }
 }

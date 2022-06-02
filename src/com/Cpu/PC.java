@@ -19,7 +19,7 @@ public class PC {
     public void bneBeqPcUpdate(boolean ID_EXEValid, ControlSignal controlSignal, int nextPC, int aluResult, int branchAddr) {
 
         if (ID_EXEValid) {
-            pc = mux(bneBeqProcess(aluResult, controlSignal), ((nextPC * 4 + branchAddr) / 4), pc);
+            pc = mux(bneBeqProcess(aluResult, controlSignal), (((nextPC+1) * 4 + branchAddr) / 4), pc);
         }
     }
 

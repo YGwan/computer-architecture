@@ -59,11 +59,10 @@ public class Register {
 
             if (controlSignal.regWrite) {
                 if (controlSignal.jal) {
-                    Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData * 4);
+                    Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData);
                 } else {
                     Logger.println("WB Stage -> R[%d] = %d\n", regDstResult, writeData);
                 }
-                Global.register[regDstResult] = writeData;
             } else {
                 Logger.println("WB Stage -> ");
             }
