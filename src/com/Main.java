@@ -1,5 +1,6 @@
 package com;
 
+import com.ControlDependence.Stalling;
 import com.Cpu.*;
 import com.CpuOutput.*;
 import com.Latch.EXE_MEM;
@@ -17,16 +18,16 @@ public class Main extends Global {
         Logger.LOGGING_SIGNAL = false;
         Logger.LOGGING_COUNTER_SIGNAL = false;
 
-        Logger.min = 29820000;
-        Logger.max = -1;
+        Logger.min = 0;
+        Logger.max = 0;
 
         test("source/simple.bin", 0);
         test("source/simple2.bin", 100);
-        test("source/simple3.bin", 5050);
+//        test("source/simple3.bin", 5050);
         test("source/simple4.bin", 55);
         test("source/gcd.bin", 1);
         test("source/fib.bin", 55);
-//        test("source/input4.bin", 85);
+        test("source/input4.bin", 85);
     }
 
     private static void test(String path, int expect) throws IOException {
@@ -83,13 +84,7 @@ public class Main extends Global {
                 Logger.countPrintln("Cycle Count : %d\n", cycleCount++);
             }
 
-//            Logger.setPrintRange(cycleCount);
-
-//            //Todo: --------------------------------------control cycle count------------------------------------
-//            if(cycleCount > 16390) {
-//                Logger.LOGGING_SIGNAL = false;
-//                Logger.LOGGING_COUNTER_SIGNAL = false;
-//            }
+            Logger.setPrintRange(cycleCount);
 
             //Todo : --------------------------------------Start WriteBack Stage------------------------------------
 
@@ -108,31 +103,14 @@ public class Main extends Global {
 
             memory.write(exe_mem.valid, exe_mem.finalAluResult, exe_mem.rtValue, exe_mem.controlSignal, exe_mem.instEndPoint);
 
-
-
             //-----------------------------------Finish MemoryAccess Stage------------------------------------
 
 
             //Todo : -----------------------------------------Start Fetch Stage--------------------------------------
 
             // instruction fetch
-
             MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
             String pcHex = Integer.toHexString(pc * 4);
-/*
-            pc가 -1로 갈때, IndexOutOfBoundsException 생기는 것을 방지하기 위해서 씀
-            try {
-                memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
-                pcHex = Integer.toHexString(pc * 4);
-                pc = nextPC;
-
-            } catch (IndexOutOfBoundsException ignored) {
-                for (int i = 0; i < 2; i++) {
-                    memoryFetchOutput = memoryFetch.fetch(fetchValid, pc - 1);
-                    pcHex = Integer.toHexString(pc * 4);
-                }
-            }
-*/
 
             //------------------------------------Finish Fetch Stage------------------------------------
 
@@ -147,12 +125,6 @@ public class Main extends Global {
 
             RegisterOutput registerOutput = register.registerCalc(if_id.valid, decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.controlSignal);
-
-            //Todo: jump, jal, bne,beq일때 fetchvaild false 만들기
-
-            if (if_id.valid) {
-                fetchValid = true;
-            }
 
             //Todo: ------------------------------------JAL / JUMP pc update--------------------------------------
 
@@ -181,14 +153,6 @@ public class Main extends Global {
             pcUpdate.pcJumpJalJrUpdate(if_id.valid, memoryFetchOutput.nextPC, decodeOutput.controlSignal,
                     id_exe.inputReadData1, decodeOutput.jumpAddr);
 
-            //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------
-
-            if (pc == -1) {
-                fetchValid = false;
-                if_id.inputValid = false;
-                inputInstEndPoint = true;
-            }
-
             //Todo : ------------------------------------Start Execution Stage--------------------------------------
 
             //RegDst 값 구하기
@@ -213,25 +177,25 @@ public class Main extends Global {
             exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData2,
                     finalAluResult, regDstResult, id_exe.instEndPoint);
 
-            if(if_id.valid) {
-                if(Objects.equals(decodeOutput.controlSignal.inst, "BNE")) {
-                    if(aluOutput.aluResult == 1) {
-                        fetchValid = false;
-                    }
-                } else if(Objects.equals(decodeOutput.controlSignal.inst, "BEQ")) {
-                    if(aluOutput.aluResult == 0) {
-                        fetchValid = false;
-                    }
-                }
-            }
+
+            //Todo : --------------------------------Stalling Control Dependence 처리--------------------------------------
+
+            fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput);
 
             //Latch
             mem_wb.input(exe_mem.valid, exe_mem.nextPc, exe_mem.controlSignal,
                     exe_mem.finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
 
+            //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------
+
+            if (pc == -1) {
+                fetchValid = false;
+                if_id.inputValid = false;
+                inputInstEndPoint = true;
+            }
+
             //Logo 출력
-            memoryFetchOutput.printFetchStage(fetchValid, cycleCount, pcHex, if_id.inputHexInstruction);
-            cycleCount++;
+            memoryFetchOutput.printFetchStage(fetchValid, cycleCount++, pcHex, if_id.inputHexInstruction);
             registerOutput.printDecodeStage(if_id.valid, decodeOutput.opcode, decodeOutput.rs, decodeOutput.rt, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput);
             aluOutput.printExecutionOutput(id_exe.valid, finalAluResult);
             pcUpdate.pcUpdatePrint(id_exe.valid);
@@ -259,6 +223,7 @@ public class Main extends Global {
         System.out.println("\n\n-------------------------- Finish Program --------------------------");
         System.out.println("total count is " + cycleCount);
         System.out.printf("result value R[2] : %d\n", Global.register[2]);
+
         return Global.register[2];
     }
 
