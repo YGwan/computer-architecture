@@ -11,4 +11,5 @@ public class MemoryOutput {
         this.controlSignal = controlSignal;
         this.memoryCalcResult = memoryCalcResult;
     }
+
 }

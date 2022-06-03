@@ -1,8 +1,6 @@
 package com.Latch;
 
 
-import com.Memory.Global;
-
 public class IF_ID {
 
     public boolean inputValid;
@@ -11,7 +9,7 @@ public class IF_ID {
     public String inputHexInstruction;
 
     public boolean valid;
-    public int nextPC;
+    public int nextPc;
     public String instruction;
     public String hexInstruction;
 
@@ -25,7 +23,7 @@ public class IF_ID {
 
     public void output() {
         this.valid = inputValid;
-        this.nextPC = inputNextPc;
+        this.nextPc = inputNextPc;
         this.instruction = inputInstruction;
         this.hexInstruction = inputHexInstruction;
     }

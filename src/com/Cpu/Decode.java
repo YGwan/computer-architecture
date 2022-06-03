@@ -1,9 +1,6 @@
 package com.Cpu;
 
 import com.CpuOutput.DecodeOutput;
-import com.Memory.Global;
-
-import static com.Memory.Global.pc;
 
 /*
  * 명령어 처리 - 구간 별로 나누기
@@ -12,7 +9,7 @@ import static com.Memory.Global.pc;
 public class Decode {
 
 
-    public DecodeOutput decodeInstruction(boolean IF_IDValid, String binaryInstruction) {
+    public DecodeOutput decodeInstruction(boolean IF_IDValid, String binaryInstruction, int pc) {
 
         if (!IF_IDValid) {
             return DecodeOutput.NONE;
@@ -33,7 +30,7 @@ public class Decode {
         ControlSignal controlSignal = new ControlSignal();
         controlSignal.setControlSignal(opcode, func);
 
-        int jumpAddr = jumpAddr(binaryInstruction);
+        int jumpAddr = jumpAddr(binaryInstruction, pc);
         int branchAddr = branchAddr(binaryInstruction);
 
         return new DecodeOutput(
@@ -101,7 +98,7 @@ public class Decode {
 
     //jumpAddr 구하기
     //JumpAddr = { PC+4[31:28], address, 2’b0 }
-    private int jumpAddr(String binaryInst) {
+    private int jumpAddr(String binaryInst, int pc) {
 
             String pcFirst4bits = String.format("%04d", (pc * 4 >> 28) & 0xf);
             String address = binaryInst.substring(6, 32);

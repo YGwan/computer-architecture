@@ -8,10 +8,10 @@ public class Global {
 //    sp -> r29
 
     public static int[] register = new int[32];
-    public static int pc;
 
-    public static void init() {
-        pc =0;
+    public static void initializedRegister() {
+        register[29] = 0x1000000;
+        register[31] = 0xFFFFFFFF;
     }
 
 }
