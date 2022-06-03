@@ -15,12 +15,6 @@ public class Memory {
 
     //address 값 설정하기
 
-    public int setAddress(boolean ID_EXEValid, ControlSignal controlSignal, int loadUpperImm, int aluResult) {
-            if(ID_EXEValid) {
-                return mux(controlSignal.lui, loadUpperImm, aluResult);
-            } else  return 0;
-    }
-
     //MemRead
     public MemoryOutput read(boolean EXE_MEMValid,int address, ControlSignal controlSignal, boolean instEndPoint) {
 

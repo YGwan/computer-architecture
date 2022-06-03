@@ -13,6 +13,13 @@ public class ALU {
 
     //ALUSrc, sll 처리 부분
 
+    public int setAddress(boolean ID_EXEValid, ControlSignal controlSignal, int loadUpperImm, int aluResult) {
+        if(ID_EXEValid) {
+            return mux(controlSignal.lui, loadUpperImm, aluResult);
+        } else  return 0;
+    }
+
+
     public int setAluInput1(boolean ID_EXEValid,ControlSignal controlSignal, int shamt, int readData1) {
         if(ID_EXEValid) {
             return mux(controlSignal.sll, shamt, readData1);
