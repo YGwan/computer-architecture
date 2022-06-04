@@ -135,6 +135,12 @@ public class ProcessUnit extends ManageLatches {
             fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput);
 
 //            Todo : ---------------------------Control Dependence 처리 : Always Taken --------------------------------------
+//
+//            if(id_exe.valid) {
+//                System.out.println(pc);
+//                System.out.println(id_exe.nextPc);
+//                System.out.println(nextPc);
+//            }
 
 
             //------------------------------------------Finish Control Dependence------------------------------------------
