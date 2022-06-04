@@ -6,7 +6,7 @@ public class EXE_MEM {
 
     public boolean inputValid;
     private ControlSignal inputControlSignal;
-    private int inputNextPc;
+    private int inputExe_memPc;
     public int inputFinalAluResult;
     public int inputRtValue;
     private int inputRegDstValue;
@@ -14,17 +14,17 @@ public class EXE_MEM {
 
     public boolean valid;
     public ControlSignal controlSignal;
-    public int nextPc;
+    public int exe_memPc;
     public int finalAluResult;
     public int rtValue;
     public int regDstValue;
     public boolean instEndPoint;
 
-    public void input(boolean valid, ControlSignal controlSignal, int nextPc, int rtValue,
+    public void input(boolean valid, ControlSignal controlSignal, int exe_memPc, int rtValue,
                    int finalAluResult, int regDstValue, boolean instEndPoint) {
         this.inputValid = valid;
         this.inputControlSignal = controlSignal;
-        this.inputNextPc = nextPc;
+        this.inputExe_memPc = exe_memPc;
         this.inputRtValue = rtValue;
         this.inputFinalAluResult = finalAluResult;
         this.inputRegDstValue = regDstValue;
@@ -34,7 +34,7 @@ public class EXE_MEM {
     public void output() {
         this.valid = inputValid;
         this.controlSignal = inputControlSignal;
-        this.nextPc = inputNextPc;
+        this.exe_memPc = inputExe_memPc;
         this.rtValue = inputRtValue;
         this.finalAluResult = inputFinalAluResult;
         this.regDstValue = inputRegDstValue;

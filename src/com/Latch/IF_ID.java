@@ -4,26 +4,26 @@ package com.Latch;
 public class IF_ID {
 
     public boolean inputValid;
-    private int inputNextPc;
+    private int inputIf_idPc;
     private String inputInstruction;
     public String inputHexInstruction;
 
     public boolean valid;
-    public int nextPc;
+    public int if_idPc;
     public String instruction;
     public String hexInstruction;
 
 
-    public void input(boolean valid, int nextPC, String instruction, String hexInstruction) {
+    public void input(boolean valid, int if_idPc, String instruction, String hexInstruction) {
         this.inputValid = valid;
-        this.inputNextPc = nextPC;
+        this.inputIf_idPc = if_idPc;
         this.inputInstruction = instruction;
         this.inputHexInstruction = hexInstruction;
     }
 
     public void output() {
         this.valid = inputValid;
-        this.nextPc = inputNextPc;
+        this.if_idPc = inputIf_idPc;
         this.instruction = inputInstruction;
         this.hexInstruction = inputHexInstruction;
     }

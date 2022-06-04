@@ -3,6 +3,7 @@ package com;
 import com.ControlDependence.Stalling;
 import com.Cpu.*;
 import com.CpuOutput.*;
+import com.DataDependence.ForwardingUnit;
 import com.Latch.*;
 import com.Memory.Global;
 
@@ -53,7 +54,7 @@ public class ProcessUnit extends ManageLatches {
             //Todo : --------------------------------------Start WriteBack Stage------------------------------------
             //MemToReg 값 구분 MUX
             int memToRegValue = register.memToRegSet(mem_wb.valid, mem_wb.controlSignal, mem_wb.memoryCalcResult, mem_wb.finalAluResult);
-            register.registerWrite(mem_wb.nextPc, mem_wb.valid, mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
+            register.registerWrite(mem_wb.mem_wbPc, mem_wb.valid, mem_wb.controlSignal, memToRegValue, mem_wb.regDst);
 
             //--------------------------------------Finish WriteBack Stage------------------------------------
 
@@ -77,13 +78,13 @@ public class ProcessUnit extends ManageLatches {
             }
 
             //Todo : ------------------------------------Start Decode Stage------------------------------------
-            DecodeOutput decodeOutput = decode.decodeInstruction(if_id.valid, if_id.instruction, if_id.nextPc);
+            DecodeOutput decodeOutput = decode.decodeInstruction(if_id.valid, if_id.instruction, if_id.if_idPc);
             RegisterOutput registerOutput = register.registerCalc(if_id.valid, decodeOutput.rs,
                     decodeOutput.rt, decodeOutput.controlSignal);
 
             //Todo : ------------------------------------Data forwarding 처리--------------------------------------
             //Latch
-            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.nextPc, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
+            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.if_idPc, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
                     decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
                     decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, instEndPoint);
 
@@ -115,23 +116,33 @@ public class ProcessUnit extends ManageLatches {
                     id_exe.inputReadData1, decodeOutput.jumpAddr);
 
             //------------------------------------------BNE / BEQ pc update------------------------------------------
-            pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc ,id_exe.nextPc, aluOutput.aluResult, id_exe.branchAddr);
+            pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc ,id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
 
             //-----------------------------------------finish pc update -----------------------------------------
 
             //loadUpper값 구분 Mux(LUI)
             int finalAluResult = alu.setAddress(id_exe.valid, id_exe.controlSignal, id_exe.loadUpper, aluOutput.aluResult);
             //Latch
-            exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.nextPc, id_exe.readData2,
+            exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.id_exePc, id_exe.readData2,
                     finalAluResult, regDstResult, id_exe.instEndPoint);
 
-            //Todo : --------------------------------Stalling Control Dependence 처리--------------------------------------
-
+//            Todo : -------------------------------Control Dependence 처리 : Stalling --------------------------------------
+//
             fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput);
+
+//            Todo : ---------------------------Control Dependence 처리 : Always Taken --------------------------------------
+
+//            if(if_id.valid) {
+//                if(Objects.equals(decodeOutput.controlSignal.inst, "BNE") ||
+//                        Objects.equals(decodeOutput.controlSignal.inst, "BEQ")) {
+//                    (if_id.valid, decodeOutput.controlSignal, pc ,if_id.nextPc, aluOutput.aluResult, id_exe.branchAddr);
+//                }
+//            }
+
 
             //------------------------------------------Finish Control Dependence------------------------------------------
             //Latch
-            mem_wb.input(exe_mem.valid, exe_mem.nextPc, exe_mem.controlSignal,
+            mem_wb.input(exe_mem.valid, exe_mem.exe_memPc, exe_mem.controlSignal,
                     exe_mem.finalAluResult, memoryOutput.memoryCalcResult, exe_mem.regDstValue, exe_mem.instEndPoint);
 
             //Todo : -----------------------------------pc == -1 일때 처리 -----------------------------------------

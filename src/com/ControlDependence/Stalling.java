@@ -2,7 +2,6 @@ package com.ControlDependence;
 
 import com.CpuOutput.AluOutput;
 import com.CpuOutput.DecodeOutput;
-import com.Latch.IF_ID;
 
 import java.util.Objects;
 

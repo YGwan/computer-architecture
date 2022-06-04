@@ -1,4 +1,4 @@
-package com;
+package com.DataDependence;
 
 import com.Cpu.ControlSignal;
 

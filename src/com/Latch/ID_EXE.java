@@ -6,7 +6,7 @@ public class ID_EXE {
 
     public boolean inputValid;
     private ControlSignal inputControlSignal;
-    public int inputNextPc;
+    public int inputId_exePc;
     public int inputReadData1;
     private int inputReadData2;
     private int inputSignExt;
@@ -22,7 +22,7 @@ public class ID_EXE {
 
     public boolean valid;
     public ControlSignal controlSignal;
-    public int nextPc;
+    public int id_exePc;
     public int readData1;
     public int readData2;
     public int signExt;
@@ -36,11 +36,11 @@ public class ID_EXE {
     public int rd;
     public boolean instEndPoint;
 
-    public void input(boolean valid, ControlSignal controlSignal, int nextPc, int readData1, int readData2, int signExt, int zeroExt,
+    public void input(boolean valid, ControlSignal controlSignal, int id_exePc, int readData1, int readData2, int signExt, int zeroExt,
                       int shamt, int jumpAddr, int branchAddr, int loadUpper, int rs, int rt, int rd, boolean instEndPoint) {
         this.inputValid = valid;
         this.inputControlSignal = controlSignal;
-        this.inputNextPc = nextPc;
+        this.inputId_exePc = id_exePc;
         this.inputReadData1 = readData1;
         this.inputReadData2 = readData2;
         this.inputSignExt = signExt;
@@ -58,7 +58,7 @@ public class ID_EXE {
     public void output() {
         this.valid = inputValid;
         this.controlSignal = inputControlSignal;
-        this.nextPc = inputNextPc;
+        this.id_exePc = inputId_exePc;
         this.readData1 = inputReadData1;
         this.readData2 = inputReadData2;;
         this.signExt = inputSignExt;

@@ -9,7 +9,7 @@ import com.CpuOutput.DecodeOutput;
 public class Decode {
 
 
-    public DecodeOutput decodeInstruction(boolean IF_IDValid, String binaryInstruction, int pc) {
+    public DecodeOutput decodeInstruction(boolean IF_IDValid, String binaryInstruction, int if_idPc) {
 
         if (!IF_IDValid) {
             return DecodeOutput.NONE;
@@ -30,7 +30,7 @@ public class Decode {
         ControlSignal controlSignal = new ControlSignal();
         controlSignal.setControlSignal(opcode, func);
 
-        int jumpAddr = jumpAddr(binaryInstruction, pc);
+        int jumpAddr = jumpAddr(binaryInstruction, if_idPc);
         int branchAddr = branchAddr(binaryInstruction);
 
         return new DecodeOutput(

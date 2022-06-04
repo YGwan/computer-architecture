@@ -19,7 +19,7 @@ public class Main extends Global {
         Logger.min = 0;
         Logger.max = -1;
 
-        test("source/simple.bin", 0);
+//        test("source/simple.bin", 0);
         test("source/simple2.bin", 100);
         test("source/simple3.bin", 5050);
         test("source/simple4.bin", 55);
@@ -35,7 +35,6 @@ public class Main extends Global {
         }
         System.out.println("succeed -> Path : " + path + " expected : " + expect + " real : " + result);
     }
-
 
     public static void printLogo(boolean fetchValid, int cycleCount, String pcHex,
                                  DecodeOutput decodeOutput, RegisterOutput registerOutput, int finalAluResult, int pc, Register register,
