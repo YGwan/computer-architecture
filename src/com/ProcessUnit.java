@@ -66,7 +66,7 @@ public class ProcessUnit extends ManageLatches {
 
             //Todo : -----------------------------------------Start Fetch Stage--------------------------------------
             MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
-            String pcHex = Integer.toHexString(pc * 4);
+            String pcHex = Integer.toHexString(pc*4);
 
             //------------------------------------Finish Fetch Stage------------------------------------
             //Latch
@@ -83,10 +83,6 @@ public class ProcessUnit extends ManageLatches {
                     decodeOutput.rt, decodeOutput.controlSignal);
 
             //Todo : ------------------------------------Data forwarding 처리--------------------------------------
-            //Latch
-            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.if_idPc, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
-                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
-                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, instEndPoint);
 
             int forwardA = forwardingUnit.forward(exe_mem.valid, mem_wb.valid, exe_mem.controlSignal, mem_wb.controlSignal,
                     exe_mem.regDstValue, id_exe.rs, mem_wb.regDst);
@@ -99,6 +95,14 @@ public class ProcessUnit extends ManageLatches {
             id_exe.readData2 = forwardMux(forwardB, id_exe.readData2, exe_mem.finalAluResult, memToRegValue);
 
             //---------------------------------------------Finish Decode Stage--------------------------------------
+
+            // nextPc값 생성
+            int nextPc = getNextPc(pc, decodeOutput);
+
+            //Latch
+            id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.if_idPc, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
+                    decodeOutput.signExt, decodeOutput.zeroExt, decodeOutput.shamt, decodeOutput.jumpAddr, decodeOutput.branchAddr,
+                    decodeOutput.loadUpperImm, decodeOutput.rs, decodeOutput.rt, decodeOutput.rd, nextPc, instEndPoint);
 
             //Todo : ------------------------------------Start Execution Stage--------------------------------------
             //RegDst 값 구하기
@@ -132,13 +136,6 @@ public class ProcessUnit extends ManageLatches {
 
 //            Todo : ---------------------------Control Dependence 처리 : Always Taken --------------------------------------
 
-//            if(if_id.valid) {
-//                if(Objects.equals(decodeOutput.controlSignal.inst, "BNE") ||
-//                        Objects.equals(decodeOutput.controlSignal.inst, "BEQ")) {
-//                    (if_id.valid, decodeOutput.controlSignal, pc ,if_id.nextPc, aluOutput.aluResult, id_exe.branchAddr);
-//                }
-//            }
-
 
             //------------------------------------------Finish Control Dependence------------------------------------------
             //Latch
@@ -167,5 +164,29 @@ public class ProcessUnit extends ManageLatches {
         System.out.println("total count is " + cycleCount);
         System.out.printf("result value R[2] : %d\n", Global.register[2]);
         return Global.register[2];
+    }
+
+    public static int getNextPc(int pc, DecodeOutput decodeOutput) {
+        //nextPc값 확인
+        int nextPc = pc;
+        if(if_id.valid) {
+            switch (decodeOutput.controlSignal.inst) {
+
+                case "JUMP" :
+                case "JAL" : {
+                    nextPc = decodeOutput.jumpAddr / 4;
+                } break;
+
+                case "JR" : {
+                    nextPc = id_exe.inputReadData1;
+                } break;
+
+                case "BNE" :
+                case "BEQ" : {
+                    nextPc = ((if_id.if_idPc+1) * 4 + decodeOutput.branchAddr) / 4;
+                }  break;
+            }
+        }
+        return nextPc;
     }
 }

@@ -17,15 +17,15 @@ public class Main extends Global {
         Logger.LOGGING_COUNTER_SIGNAL = false;
 
         Logger.min = 0;
-        Logger.max = -1;
+        Logger.max = 10000;
 
 //        test("source/simple.bin", 0);
-        test("source/simple2.bin", 100);
-        test("source/simple3.bin", 5050);
-        test("source/simple4.bin", 55);
-        test("source/gcd.bin", 1);
+//        test("source/simple2.bin", 100);
+//        test("source/simple3.bin", 5050);
+//        test("source/simple4.bin", 55);
+//        test("source/gcd.bin", 1);
         test("source/fib.bin", 55);
-        test("source/input4.bin", 85);
+//        test("source/input4.bin", 85);
     }
 
     private static void test(String path, int expect) throws IOException {

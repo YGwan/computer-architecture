@@ -50,9 +50,10 @@ public class Decode {
         );
     }
 
+
     //signExt 만들기
     //SignExtImm = { 16{immediate[15]}, immediate
-    public int setSignExtImm(String binaryInstruction) {
+    private int setSignExtImm(String binaryInstruction) {
         char firstImmeBit = binaryInstruction.charAt(16);
         StringBuilder signExtImmBinaryString = new StringBuilder();
 
@@ -73,7 +74,7 @@ public class Decode {
 
     //zeroExt 만들기
     //ZeroExtImm = { 16{1b’0}, immediate }
-    public int setZeroExt(String binaryInstruction) {
+    private int setZeroExt(String binaryInstruction) {
         String zeroExtImmBinaryString = "0000000000000000" +
                 binaryInstruction.substring(16, 32);
         return readTobinaryString(zeroExtImmBinaryString);
@@ -81,7 +82,7 @@ public class Decode {
 
     //Load Upper Imm 만들기
     //{imm, 16’b0}
-    public int setLoadUpperImm(String binaryInstruction) {
+    private int setLoadUpperImm(String binaryInstruction) {
         StringBuilder loadUpperImmBinaryString = new StringBuilder();
         loadUpperImmBinaryString.append(binaryInstruction, 16, 32);
         loadUpperImmBinaryString.append("0000000000000000");

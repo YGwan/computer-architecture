@@ -8,6 +8,7 @@ public class PC {
     //pc 설정 부분
     public int pcJumpJalJrUpdate(boolean IF_IDValid, int pc, ControlSignal controlSignal, int inputReadData1, int decodeJumpAddr) {
         if(IF_IDValid) {
+
             int pc1 = mux(controlSignal.jump, decodeJumpAddr / 4, pc);
             int pc2 = mux(controlSignal.jal, decodeJumpAddr/4 , pc1);
             return mux(controlSignal.jr, inputReadData1, pc2);
