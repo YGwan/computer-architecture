@@ -1,18 +1,20 @@
 package com;
 
+import com.ControlDependence.AlwaysNotTaken;
 import com.ControlDependence.AlwaysTaken;
 import com.ControlDependence.ChooseBranchPrediction;
 import com.ControlDependence.Stalling;
 import com.Cpu.*;
 import com.CpuOutput.*;
 import com.DataDependence.ForwardingUnit;
-import com.Latch.*;
+import com.Latch.ManageLatches;
 import com.Memory.Global;
 
 import java.io.IOException;
 import java.util.Objects;
 
-import static com.Main.*;
+import static com.Main.forwardMux;
+import static com.Main.printLogo;
 
 public class ProcessUnit extends ManageLatches {
 
@@ -36,6 +38,8 @@ public class ProcessUnit extends ManageLatches {
 
         //branch prediction strategy
         AlwaysTaken alwaysTaken = new AlwaysTaken();
+        AlwaysNotTaken alwaysNotTaken = new AlwaysNotTaken();
+
 
         //Latch 선언
         ManageLatches.declareLatches();
@@ -72,7 +76,7 @@ public class ProcessUnit extends ManageLatches {
 
             //Todo : -----------------------------------------Start Fetch Stage--------------------------------------
             MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
-            String pcHex = Integer.toHexString(pc*4);
+            String pcHex = Integer.toHexString(pc * 4);
             int currentStagePc = pc; //Todo: 업데이트 전 현재 pc값 저장
 
             //------------------------------------Finish Fetch Stage------------------------------------
@@ -80,7 +84,7 @@ public class ProcessUnit extends ManageLatches {
             if_id.input(fetchValid, pc, memoryFetchOutput.instruction, memoryFetchOutput.hexInstruction);
 
             //Todo : -----------------------------------------pc Update----------------------------------------
-            if(fetchValid) {
+            if (fetchValid) {
                 pc = pc + 1;
             }
 
@@ -128,23 +132,29 @@ public class ProcessUnit extends ManageLatches {
 
             //------------------------------------------BNE / BEQ pc update------------------------------------------
 //           Todo : -------------------------------Control Dependence 처리 --------------------------------------
-            if(ChooseBranchPrediction.onAlwaysTaken) {
-                pc =pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
-                if(id_exe.valid) {
-                    if(Objects.equals(id_exe.controlSignal.inst, "BNE") ||
-                            Objects.equals(id_exe.controlSignal.inst, "BEQ"))
-                        if(!(alwaysTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+            if (ChooseBranchPrediction.onAlwaysTaken) {
+                pc = pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
+                if (id_exe.valid) {
+                    if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                            Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                        if (!(alwaysTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
                             if_id.inputValid = false;
                             pc = id_exe.id_exePc + 2;
                         }
                     }
-            }
-
-            else if(ChooseBranchPrediction.onAlwaysNotTaken) {
-
-            }
-            else {
-                pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc ,id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
+                }
+            } else if (ChooseBranchPrediction.onAlwaysNotTaken) {
+                if (id_exe.valid) {
+                    if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                            Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                        if (!(alwaysNotTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+                            if_id.inputValid = false;
+                            pc = id_exe.nextPc;
+                        }
+                    }
+                }
+            } else {
+                pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc, id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
                 fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput); //Todo: Stalling
             }
             //-----------------------------------------finish pc update -----------------------------------------
@@ -157,11 +167,6 @@ public class ProcessUnit extends ManageLatches {
 
 
 //            Todo : ---------------------------Control Dependence 처리 : Always Taken --------------------------------------
-//            if(id_exe.valid) {
-//                System.out.println(currentStagePc);
-//                System.out.println(id_exe.nextPc);
-//                System.out.println(nextPc);
-//            }
 
             //------------------------------------------Finish Control Dependence------------------------------------------
             //Latch
@@ -195,22 +200,25 @@ public class ProcessUnit extends ManageLatches {
     public static int getNextPc(int pc, DecodeOutput decodeOutput) {
         //nextPc값 확인
         int nextPc = pc;
-        if(if_id.valid) {
+        if (if_id.valid) {
             switch (decodeOutput.controlSignal.inst) {
 
-                case "JUMP" :
-                case "JAL" : {
+                case "JUMP":
+                case "JAL": {
                     nextPc = decodeOutput.jumpAddr / 4;
-                } break;
+                }
+                break;
 
-                case "JR" : {
+                case "JR": {
                     nextPc = id_exe.inputReadData1;
-                } break;
+                }
+                break;
 
-                case "BNE" :
-                case "BEQ" : {
-                    nextPc = ((if_id.if_idPc+1) * 4 + decodeOutput.branchAddr) / 4;
-                }  break;
+                case "BNE":
+                case "BEQ": {
+                    nextPc = ((if_id.if_idPc + 1) * 4 + decodeOutput.branchAddr) / 4;
+                }
+                break;
             }
         }
         return nextPc;
