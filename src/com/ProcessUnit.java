@@ -13,8 +13,7 @@ import com.Memory.Global;
 import java.io.IOException;
 import java.util.Objects;
 
-import static com.Main.forwardMux;
-import static com.Main.printLogo;
+import static com.Main.*;
 
 public class ProcessUnit extends ManageLatches {
 
@@ -39,7 +38,6 @@ public class ProcessUnit extends ManageLatches {
         //branch prediction strategy
         AlwaysTaken alwaysTaken = new AlwaysTaken();
         AlwaysNotTaken alwaysNotTaken = new AlwaysNotTaken();
-
 
         //Latch 선언
         ManageLatches.declareLatches();
@@ -108,7 +106,7 @@ public class ProcessUnit extends ManageLatches {
             //---------------------------------------------Finish Decode Stage--------------------------------------
 
             // nextPc값 생성
-            int nextPc = getNextPc(pc, decodeOutput);
+            int nextPc = getNextPc(if_id, id_exe, pc, decodeOutput);
 
             //Latch
             id_exe.input(if_id.valid, decodeOutput.controlSignal, if_id.if_idPc, registerOutput.firstRegisterOutput, registerOutput.secondRegisterOutput,
@@ -132,7 +130,8 @@ public class ProcessUnit extends ManageLatches {
 
             //------------------------------------------BNE / BEQ pc update------------------------------------------
 //           Todo : -------------------------------Control Dependence 처리 --------------------------------------
-            if (ChooseBranchPrediction.onAlwaysTaken) {
+
+            if (ChooseBranchPrediction.onAlwaysTaken) { //Todo: AlwaysTaken
                 pc = pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
                 if (id_exe.valid) {
                     if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
@@ -143,7 +142,7 @@ public class ProcessUnit extends ManageLatches {
                         }
                     }
                 }
-            } else if (ChooseBranchPrediction.onAlwaysNotTaken) {
+            } else if (ChooseBranchPrediction.onAlwaysNotTaken) { //Todo: AlwaysNotTaken
                 if (id_exe.valid) {
                     if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
                             Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
@@ -153,9 +152,9 @@ public class ProcessUnit extends ManageLatches {
                         }
                     }
                 }
-            } else {
+            } else { //Todo: Stalling
                 pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc, id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
-                fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput); //Todo: Stalling
+                fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput);
             }
             //-----------------------------------------finish pc update -----------------------------------------
 
@@ -164,9 +163,6 @@ public class ProcessUnit extends ManageLatches {
             //Latch
             exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.id_exePc, id_exe.readData2,
                     finalAluResult, regDstResult, id_exe.instEndPoint);
-
-
-//            Todo : ---------------------------Control Dependence 처리 : Always Taken --------------------------------------
 
             //------------------------------------------Finish Control Dependence------------------------------------------
             //Latch
@@ -195,32 +191,5 @@ public class ProcessUnit extends ManageLatches {
         System.out.println("total count is " + cycleCount);
         System.out.printf("result value R[2] : %d\n", Global.register[2]);
         return Global.register[2];
-    }
-
-    public static int getNextPc(int pc, DecodeOutput decodeOutput) {
-        //nextPc값 확인
-        int nextPc = pc;
-        if (if_id.valid) {
-            switch (decodeOutput.controlSignal.inst) {
-
-                case "JUMP":
-                case "JAL": {
-                    nextPc = decodeOutput.jumpAddr / 4;
-                }
-                break;
-
-                case "JR": {
-                    nextPc = id_exe.inputReadData1;
-                }
-                break;
-
-                case "BNE":
-                case "BEQ": {
-                    nextPc = ((if_id.if_idPc + 1) * 4 + decodeOutput.branchAddr) / 4;
-                }
-                break;
-            }
-        }
-        return nextPc;
     }
 }

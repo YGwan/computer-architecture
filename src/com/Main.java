@@ -44,6 +44,33 @@ public class Main extends Global {
         System.out.println("succeed -> Path : " + path + " expected : " + expect + " real : " + result);
     }
 
+    public static int getNextPc(IF_ID if_id, ID_EXE id_exe,int pc, DecodeOutput decodeOutput) {
+        //nextPc값 확인
+        int nextPc = pc;
+        if (if_id.valid) {
+            switch (decodeOutput.controlSignal.inst) {
+
+                case "JUMP":
+                case "JAL": {
+                    nextPc = decodeOutput.jumpAddr / 4;
+                }
+                break;
+
+                case "JR": {
+                    nextPc = id_exe.inputReadData1;
+                }
+                break;
+
+                case "BNE":
+                case "BEQ": {
+                    nextPc = ((if_id.if_idPc + 1) * 4 + decodeOutput.branchAddr) / 4;
+                }
+                break;
+            }
+        }
+        return nextPc;
+    }
+
     public static void printLogo(boolean fetchValid, int cycleCount, String pcHex,
                                  DecodeOutput decodeOutput, RegisterOutput registerOutput, int finalAluResult, int pc, Register register,
                                  IF_ID if_id, ID_EXE id_exe, EXE_MEM exe_mem, MEM_WB mem_wb,
