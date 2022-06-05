@@ -2,10 +2,10 @@ package com.ControlDependence;
 
 
 
-public class AlwaysTaken {
+public class AlwaysTaken implements branchController{
 
-
-    public boolean alwaysTaken() {
+    @Override
+    public boolean taken() {
         return true;
     }
 }

@@ -9,6 +9,8 @@ public class Global {
 
     public static int[] register = new int[32];
 
+    public static boolean onBranchPrediction;
+
     public static void initializedRegister() {
         register[29] = 0x1000000;
         register[31] = 0xFFFFFFFF;

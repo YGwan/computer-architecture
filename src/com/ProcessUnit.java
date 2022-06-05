@@ -1,5 +1,7 @@
 package com;
 
+import com.ControlDependence.AlwaysTaken;
+import com.ControlDependence.ChooseBranchPrediction;
 import com.ControlDependence.Stalling;
 import com.Cpu.*;
 import com.CpuOutput.*;
@@ -8,6 +10,7 @@ import com.Latch.*;
 import com.Memory.Global;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static com.Main.*;
 
@@ -30,6 +33,9 @@ public class ProcessUnit extends ManageLatches {
         ALU alu = new ALU();
         Memory memory = new Memory();
         ForwardingUnit forwardingUnit = new ForwardingUnit();
+
+        //branch prediction strategy
+        AlwaysTaken alwaysTaken = new AlwaysTaken();
 
         //Latch 선언
         ManageLatches.declareLatches();
@@ -67,6 +73,7 @@ public class ProcessUnit extends ManageLatches {
             //Todo : -----------------------------------------Start Fetch Stage--------------------------------------
             MemoryFetchOutput memoryFetchOutput = memoryFetch.fetch(fetchValid, pc);
             String pcHex = Integer.toHexString(pc*4);
+            int currentStagePc = pc; //Todo: 업데이트 전 현재 pc값 저장
 
             //------------------------------------Finish Fetch Stage------------------------------------
             //Latch
@@ -120,8 +127,26 @@ public class ProcessUnit extends ManageLatches {
                     id_exe.inputReadData1, decodeOutput.jumpAddr);
 
             //------------------------------------------BNE / BEQ pc update------------------------------------------
-            pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc ,id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
+//           Todo : -------------------------------Control Dependence 처리 --------------------------------------
+            if(ChooseBranchPrediction.onAlwaysTaken) {
+                pc =pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
+                if(id_exe.valid) {
+                    if(Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                            Objects.equals(id_exe.controlSignal.inst, "BEQ"))
+                        if(!(alwaysTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+                            if_id.inputValid = false;
+                            pc = id_exe.id_exePc + 2;
+                        }
+                    }
+            }
 
+            else if(ChooseBranchPrediction.onAlwaysNotTaken) {
+
+            }
+            else {
+                pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc ,id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
+                fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput); //Todo: Stalling
+            }
             //-----------------------------------------finish pc update -----------------------------------------
 
             //loadUpper값 구분 Mux(LUI)
@@ -130,18 +155,13 @@ public class ProcessUnit extends ManageLatches {
             exe_mem.input(id_exe.valid, id_exe.controlSignal, id_exe.id_exePc, id_exe.readData2,
                     finalAluResult, regDstResult, id_exe.instEndPoint);
 
-//            Todo : -------------------------------Control Dependence 처리 : Stalling --------------------------------------
-//
-            fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput);
 
 //            Todo : ---------------------------Control Dependence 처리 : Always Taken --------------------------------------
-//
 //            if(id_exe.valid) {
-//                System.out.println(pc);
+//                System.out.println(currentStagePc);
 //                System.out.println(id_exe.nextPc);
 //                System.out.println(nextPc);
 //            }
-
 
             //------------------------------------------Finish Control Dependence------------------------------------------
             //Latch
