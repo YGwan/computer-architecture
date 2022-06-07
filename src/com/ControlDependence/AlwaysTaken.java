@@ -1,7 +1,6 @@
 package com.ControlDependence;
 
 
-
 public class AlwaysTaken implements branchController{
 
     @Override

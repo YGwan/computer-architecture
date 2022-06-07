@@ -7,7 +7,8 @@ import java.util.Objects;
 
 public class Stalling {
 
-    public static boolean stallingMethod(boolean if_idValid, boolean fetchValid, DecodeOutput decodeOutput, AluOutput aluOutput) {
+    public static boolean stallingMethod(boolean if_idValid, boolean fetchValid,
+                                         DecodeOutput decodeOutput, AluOutput aluOutput) {
         if(if_idValid) {
             if(Objects.equals(decodeOutput.controlSignal.inst, "BNE")) {
                 if(aluOutput.aluResult == 1) {

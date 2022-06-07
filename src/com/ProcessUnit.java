@@ -136,10 +136,12 @@ public class ProcessUnit extends ManageLatches {
                 if (id_exe.valid) {
                     if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
                             Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                        branchAllCount++;
+
                         if (!(alwaysTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
                             if_id.inputValid = false;
                             pc = id_exe.id_exePc + 2;
-                        }
+                        } else branchCorrectCount++;
                     }
                 }
             } else if (ChooseBranchPrediction.onAlwaysNotTaken) { //Todo: AlwaysNotTaken
@@ -149,7 +151,7 @@ public class ProcessUnit extends ManageLatches {
                         if (!(alwaysNotTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
                             if_id.inputValid = false;
                             pc = id_exe.nextPc;
-                        }
+                        } else branchCorrectCount++;
                     }
                 }
             } else { //Todo: Stalling
@@ -189,6 +191,11 @@ public class ProcessUnit extends ManageLatches {
 
         System.out.println("\n\n-------------------------- Finish Program --------------------------");
         System.out.println("total count is " + cycleCount);
+        try {
+            System.out.printf("correct is %.2f\n", branchCorrectCount/branchAllCount * 100 );
+        } catch (ArithmeticException e) {
+            e.printStackTrace();
+        }
         System.out.printf("result value R[2] : %d\n", Global.register[2]);
         return Global.register[2];
     }
