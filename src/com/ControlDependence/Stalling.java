@@ -1,5 +1,6 @@
 package com.ControlDependence;
 
+import com.Cpu.ControlSignal;
 import com.CpuOutput.AluOutput;
 import com.CpuOutput.DecodeOutput;
 
@@ -7,16 +8,16 @@ import java.util.Objects;
 
 public class Stalling {
 
-    public static boolean stallingMethod(boolean if_idValid, boolean fetchValid,
-                                         DecodeOutput decodeOutput, AluOutput aluOutput) {
+    public static boolean stallingMethod(boolean if_idValid, boolean id_exeValid, boolean fetchValid,
+                                         DecodeOutput decodeOutput, ControlSignal controlSignal) {
         if(if_idValid) {
             if(Objects.equals(decodeOutput.controlSignal.inst, "BNE")) {
-                if(aluOutput.aluResult == 1) {
-                    fetchValid = false;
+                if(id_exeValid) {
+                    fetchValid = Objects.equals(controlSignal.inst, "BNE");
                 }
             } else if (Objects.equals(decodeOutput.controlSignal.inst, "BEQ")) {
-                if(aluOutput.aluResult == 0) {
-                    fetchValid = false;
+                if(id_exeValid) {
+                    fetchValid = Objects.equals(controlSignal.inst, "BEQ");
                 }
             } else {
                 fetchValid = true;

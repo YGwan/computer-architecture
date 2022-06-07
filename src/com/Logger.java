@@ -9,11 +9,7 @@ public class Logger {
     public static int max = 0;
 
     public static void setPrintRange(int cycle) {
-        if(min < cycle && cycle < max) {
-            LOGGING_SIGNAL = true;
-        } else {
-            LOGGING_SIGNAL = false;
-        }
+        LOGGING_SIGNAL = min < cycle && cycle < max;
     }
 
     public static void println() {

@@ -1,9 +1,6 @@
 package com;
 
-import com.ControlDependence.AlwaysNotTaken;
-import com.ControlDependence.AlwaysTaken;
-import com.ControlDependence.ChooseBranchPrediction;
-import com.ControlDependence.Stalling;
+import com.ControlDependence.*;
 import com.Cpu.*;
 import com.CpuOutput.*;
 import com.DataDependence.ForwardingUnit;
@@ -38,6 +35,7 @@ public class ProcessUnit extends ManageLatches {
         //branch prediction strategy
         AlwaysTaken alwaysTaken = new AlwaysTaken();
         AlwaysNotTaken alwaysNotTaken = new AlwaysNotTaken();
+        OneBitPrediction oneBitPrediction = new OneBitPrediction();
 
         //Latch 선언
         ManageLatches.declareLatches();
@@ -131,17 +129,24 @@ public class ProcessUnit extends ManageLatches {
             //------------------------------------------BNE / BEQ pc update------------------------------------------
 //           Todo : -------------------------------Control Dependence 처리 --------------------------------------
 
+            if(id_exe.valid) {
+                if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                        Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                    branchAllCount++;
+                    branchCorrectCount++;
+                }
+            }
+
             if (ChooseBranchPrediction.onAlwaysTaken) { //Todo: AlwaysTaken
                 pc = pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
                 if (id_exe.valid) {
                     if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
                             Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
-                        branchAllCount++;
-
                         if (!(alwaysTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
                             if_id.inputValid = false;
                             pc = id_exe.id_exePc + 2;
-                        } else branchCorrectCount++;
+                            branchCorrectCount--;
+                        }
                     }
                 }
             } else if (ChooseBranchPrediction.onAlwaysNotTaken) { //Todo: AlwaysNotTaken
@@ -151,13 +156,43 @@ public class ProcessUnit extends ManageLatches {
                         if (!(alwaysNotTaken.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
                             if_id.inputValid = false;
                             pc = id_exe.nextPc;
-                        } else branchCorrectCount++;
+                            branchCorrectCount--;
+                        }
                     }
                 }
-            } else { //Todo: Stalling
-                pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc, id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
-                fetchValid = Stalling.stallingMethod(if_id.valid, fetchValid, decodeOutput, aluOutput);
+            } else if (ChooseBranchPrediction.onOneBitPrediction) { // Todo: one bit prediction
+               if(oneBitPrediction.checkBit) {
+                   pc = pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
+                   if (id_exe.valid) {
+                       if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                               Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                           if (!(oneBitPrediction.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+                               if_id.inputValid = false;
+                               pc = id_exe.id_exePc + 2;
+                               oneBitPrediction.checkBit = false;
+                               branchCorrectCount--;
+                           }
+                       }
+                   }
+               } else {
+                   if (id_exe.valid) {
+                       if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                               Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                           if (!(oneBitPrediction.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+                               if_id.inputValid = false;
+                               pc = id_exe.nextPc;
+                               oneBitPrediction.checkBit = true;
+                               branchCorrectCount--;
+                           }
+                       }
+                   }
+               }
             }
+            else { //Todo: Stalling
+                fetchValid = Stalling.stallingMethod(if_id.valid, id_exe.valid ,fetchValid, decodeOutput, id_exe.controlSignal);
+                pc = pcUpdate.bneBeqPcUpdate(id_exe.valid, id_exe.controlSignal, pc, id_exe.id_exePc, aluOutput.aluResult, id_exe.branchAddr);
+            }
+
             //-----------------------------------------finish pc update -----------------------------------------
 
             //loadUpper값 구분 Mux(LUI)
@@ -188,6 +223,7 @@ public class ProcessUnit extends ManageLatches {
             //EndPoint Update
             instEndPoint = inputInstEndPoint;
         }
+
 
         System.out.println("\n\n-------------------------- Finish Program --------------------------");
         System.out.println("total count is " + cycleCount);

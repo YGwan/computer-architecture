@@ -22,7 +22,7 @@ public class Main extends Global {
         //           Todo : -----------------------------branch Prediction 선택 --------------------------------------
         onBranchPrediction = true; //Todo : false -> stalling, true -> branch prediction 선택
         ChooseBranchPrediction chooseBranchPrediction = new ChooseBranchPrediction();
-        chooseBranchPrediction.chooseBP(true ,false);
+        chooseBranchPrediction.chooseBP(false ,false, true);
 
         Logger.min = 0;
         Logger.max = -1;
