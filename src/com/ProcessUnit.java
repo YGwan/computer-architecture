@@ -36,6 +36,7 @@ public class ProcessUnit extends ManageLatches {
         AlwaysTaken alwaysTaken = new AlwaysTaken();
         AlwaysNotTaken alwaysNotTaken = new AlwaysNotTaken();
         OneBitPrediction oneBitPrediction = new OneBitPrediction();
+        TwoBitPrediction twoBitPrediction = new TwoBitPrediction();
 
         //Latch 선언
         ManageLatches.declareLatches();
@@ -187,6 +188,37 @@ public class ProcessUnit extends ManageLatches {
                        }
                    }
                }
+            } else if(ChooseBranchPrediction.onTwoBitPrediction) { //Todo: two bit prediction
+                if(twoBitPrediction.taken()) {
+                    pc = pcUpdate.AlwaysTakenPcUpdate(if_id.valid, decodeOutput.controlSignal, pc, nextPc);
+                    if (id_exe.valid) {
+                        if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                                Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                            if (!(twoBitPrediction.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+                                if_id.inputValid = false;
+                                pc = id_exe.id_exePc + 2;
+                                twoBitPrediction.chance--;
+                                branchCorrectCount--;
+                            } else {
+                                twoBitPrediction.chance++;
+                            }
+                        }
+                    }
+                } else {
+                    if (id_exe.valid) {
+                        if (Objects.equals(id_exe.controlSignal.inst, "BNE") ||
+                                Objects.equals(id_exe.controlSignal.inst, "BEQ")) {
+                            if (!(twoBitPrediction.taken() == pcUpdate.bneBeqProcess(aluOutput.aluResult, id_exe.controlSignal))) {
+                                if_id.inputValid = false;
+                                pc = id_exe.nextPc;
+                                twoBitPrediction.chance++;
+                                branchCorrectCount--;
+                            } else {
+                                twoBitPrediction.chance--;
+                            }
+                        }
+                    }
+                }
             }
             else { //Todo: Stalling
                 fetchValid = Stalling.stallingMethod(if_id.valid, id_exe.valid ,fetchValid, decodeOutput, id_exe.controlSignal);
