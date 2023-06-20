@@ -28,7 +28,9 @@ Simple Calculator, Single-cycle, PipeLine
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/9f4ff433-6d96-46eb-b5e5-e04bace01fc3)
+<p align="center">
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/9f4ff433-6d96-46eb-b5e5-e04bace01fc3" width = "1000" height = "800"/>
+</p>
 
 따라서 single cycle, multi cycle, pipeline의 실행 과정을 간단히 표현하자면 위와 같이 표현할 수 있습니다. 해당 과정의 발전 순서는 single cycle -> multi cycle -> pipeline 순으로 진행됩니다. 
 처음에는 한 사이클에 명령어 하나가 실행되게끔 하는 형태인 싱글 사이클 형태를 가졌다가 이러한 과정에서 명령어에 따라 불필요한 단계를 실행시켜야 하는 비효율이 발생해 한 사이클에 한 명령어가 아닌, 한 사이클에 한 단계씩 실행시켜 명령어에 따라 실행하는 단계를 다르게 만드는 멀티 사이클 형태로 발전합니다. 
@@ -119,7 +121,11 @@ Data Dependence 해결방법은 크게 5가지가 있습니다.
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/78464396-0b47-4556-bf02-57c491d10f0b)
+<p align="center">
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/78464396-0b47-4556-bf02-57c491d10f0b" width = "1000" height = "500"/>
+</p>
+
+<br>
 
 <br>
 
@@ -214,7 +220,9 @@ Execution 단계에서 계산한 결과가 예상한 결과와 일치하면 무�
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/665da856-4eea-4364-bb54-892e7e8c4976)
+<p align="center">
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/665da856-4eea-4364-bb54-892e7e8c4976" width = "500" height = "500"/>
+</p>
 
 <br>
 
@@ -228,7 +236,7 @@ Execution 단계에서 계산한 결과가 예상한 결과와 일치하면 무�
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/55e92159-fbc0-4a05-a910-582499506f3b)
+<img src="https://github.com/YGwan/computer-architecture/assets/50222603/55e92159-fbc0-4a05-a910-582499506f3b"/>
 
 <br>
  제가 구현한 첫번째 정적 분기 예측 방법은 alwaysTaken 방법 입니다. alwaysTaken이란 일단 분기 예측이 항상 참인 경우로 가정하고 예측을 하는 방법입니다. 따라서 taken()함수는 항상 참입니다.  
@@ -240,11 +248,13 @@ Execution 단계에서 계산한 결과가 예상한 결과와 일치하면 무�
 
 <br>
 
+<br>
+
 ## Static Branch Prediction :: AlwaysNotTaken 구현 방법
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/fd6d31b0-b5cc-4d7e-8e26-97bc9e8a3db1)
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/fd6d31b0-b5cc-4d7e-8e26-97bc9e8a3db1"/>
 
 <br>
 
@@ -266,7 +276,9 @@ Execution 단계에서 계산한 결과가 예상한 결과와 일치하면 무�
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/1f21abc8-e905-42a2-8bc6-303dd12ad49b)
+<p align="center">
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/1f21abc8-e905-42a2-8bc6-303dd12ad49b" width = "500" height = "500"/>
+</p>
 
 <br>
 
@@ -279,7 +291,9 @@ Last time prediction이란 1 bit의 데이터 값을 가지고 분기 여부를 
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/51704adc-9b2c-4184-93ee-8a999e951ab8)
+<p align="center">
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/51704adc-9b2c-4184-93ee-8a999e951ab8"  width = "500" height = "500"/>
+</p>
 
 <br>
 
@@ -327,7 +341,10 @@ Two - bit counter - based prediction이란 2 bit의 데이터 값을 가지고 �
 
 <br>
 
-![image](https://github.com/YGwan/computer-architecture/assets/50222603/a073198d-bed0-4889-b741-446996035068)
+<img src = "https://github.com/YGwan/computer-architecture/assets/50222603/a073198d-bed0-4889-b741-446996035068" width = "800" height = "500"/>
+
+<br>
+
 
 <br>
 
